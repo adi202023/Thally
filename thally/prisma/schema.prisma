@@ -1,0 +1,345 @@
+// Thally — Prisma Schema
+// Supports SQLite locally, PostgreSQL in production.
+// To switch: change provider to "postgresql" and set DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users & Orgs ────────────────────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  avatarUrl      String?
+  role           String   @default("maintainer") // admin | maintainer | viewer
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  reviews        Review[]
+  auditEvents    AuditEvent[]
+  assignedTasks  DocumentationTask[] @relation("TaskAssignee")
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  logoUrl     String?
+  planTier    String   @default("demo") // demo | starter | pro | enterprise
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  repositories Repository[]
+  projects     Project[]
+}
+
+// ─── Repositories ────────────────────────────────────────────────────────────
+
+model Repository {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  provider       String   @default("mock") // mock | github | gitlab | bitbucket
+  providerRepoId String?  // remote repo id
+  ownerName      String
+  repoName       String
+  defaultBranch  String   @default("main")
+  isPrivate      Boolean  @default(false)
+  webhookSecret  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  commits        Commit[]
+  productChanges ProductChange[]
+}
+
+model Commit {
+  id           String   @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+  sha          String
+  shortSha     String
+  message      String
+  author       String
+  authorEmail  String
+  authoredAt   DateTime
+  additions    Int      @default(0)
+  deletions    Int      @default(0)
+  filesChanged Int      @default(0)
+  diff         String?  // raw diff text
+  createdAt    DateTime @default(now())
+
+  productChanges ProductChange[]
+  deployments    Deployment[]
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+
+model Project {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  status         String   @default("active") // active | archived
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  productChanges ProductChange[]
+  knowledgeAreas KnowledgeArea[]
+  docPages       DocumentationPage[]
+}
+
+// ─── Product Changes ──────────────────────────────────────────────────────────
+
+model ProductChange {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id])
+  repositoryId   String
+  repository     Repository @relation(fields: [repositoryId], references: [id])
+  commitId       String?
+  commit         Commit?  @relation(fields: [commitId], references: [id])
+  title          String
+  description    String?
+  changeType     String   @default("feature") // feature | bugfix | refactor | breaking
+  severity       String   @default("medium")  // low | medium | high | critical
+  status         String   @default("detected") // detected | analyzing | analyzed | task_created | proposal_generated | in_review | approved | merged | published
+  detectedAt     DateTime @default(now())
+  analyzedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  impactReports      ImpactReport[]
+  evidence           Evidence[]
+  documentationTasks DocumentationTask[]
+  auditEvents        AuditEvent[]
+}
+
+// ─── Knowledge Areas ──────────────────────────────────────────────────────────
+
+model KnowledgeArea {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  slug        String
+  title       String
+  description String?
+  category    String   @default("docs") // docs | api | guide | reference
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  docPages    DocumentationPage[]
+  impactItems ImpactReportItem[]
+}
+
+// ─── Evidence ─────────────────────────────────────────────────────────────────
+
+model Evidence {
+  id              String   @id @default(cuid())
+  productChangeId String
+  productChange   ProductChange @relation(fields: [productChangeId], references: [id])
+  type            String   // commit | file | code_snippet | test | api_definition | ui_screenshot | existing_doc | changelog | config | permission
+  title           String
+  description     String?
+  sourceFile      String?
+  lineStart       Int?
+  lineEnd         Int?
+  content         String?  // raw code/text snippet
+  commitSha       String?
+  whyItMatters    String?
+  createdAt       DateTime @default(now())
+
+  impactItems     ImpactReportItem[]
+}
+
+// ─── Impact Reports ───────────────────────────────────────────────────────────
+
+model ImpactReport {
+  id              String   @id @default(cuid())
+  productChangeId String
+  productChange   ProductChange @relation(fields: [productChangeId], references: [id])
+  changeSummary   String
+  userImpact      String
+  confidence      String   @default("high") // high | medium | low
+  risks           String   // JSON array of risk strings
+  recommendedActions String // JSON array of action strings
+  analysisMode    String   @default("demo") // demo | connected
+  generatedAt     DateTime @default(now())
+
+  items           ImpactReportItem[]
+}
+
+model ImpactReportItem {
+  id              String   @id @default(cuid())
+  impactReportId  String
+  impactReport    ImpactReport @relation(fields: [impactReportId], references: [id])
+  knowledgeAreaId String?
+  knowledgeArea   KnowledgeArea? @relation(fields: [knowledgeAreaId], references: [id])
+  evidenceId      String?
+  evidence        Evidence? @relation(fields: [evidenceId], references: [id])
+  affectedStatus  String   // definitely | possibly | unaffected
+  reasoning       String
+  confidence      String   @default("high")
+}
+
+// ─── Documentation Tasks ──────────────────────────────────────────────────────
+
+model DocumentationTask {
+  id              String   @id @default(cuid())
+  productChangeId String
+  productChange   ProductChange @relation(fields: [productChangeId], references: [id])
+  assigneeId      String?
+  assignee        User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  title           String
+  description     String
+  priority        String   @default("high") // low | medium | high | critical
+  status          String   @default("open") // open | in_progress | in_review | done | cancelled
+  acceptanceCriteria String // JSON array
+  affectedPages   String   // JSON array of page slugs
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  proposals       DocumentationProposal[]
+}
+
+// ─── Documentation Proposals ──────────────────────────────────────────────────
+
+model DocumentationProposal {
+  id              String   @id @default(cuid())
+  taskId          String
+  task            DocumentationTask @relation(fields: [taskId], references: [id])
+  pageSlug        String
+  pageTitle       String
+  currentContent  String   // current markdown
+  proposedContent String   // proposed markdown
+  changeSummary   String
+  status          String   @default("pending") // pending | editing | approved | rejected
+  analysisMode    String   @default("demo")
+  generatedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  reviews         Review[]
+  previews        Preview[]
+}
+
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+
+model Review {
+  id           String   @id @default(cuid())
+  proposalId   String
+  proposal     DocumentationProposal @relation(fields: [proposalId], references: [id])
+  reviewerId   String
+  reviewer     User     @relation(fields: [reviewerId], references: [id])
+  decision     String   // approved | rejected | edited
+  comment      String?
+  editedContent String? // if edited, the final content
+  reviewedAt   DateTime @default(now())
+}
+
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
+model Preview {
+  id                  String   @id @default(cuid())
+  proposalId          String
+  proposal            DocumentationProposal @relation(fields: [proposalId], references: [id])
+  status              String   @default("generating") // generating | ready | failed
+  previewUrl          String?
+  validationResults   String   // JSON array of check results
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  deployments         Deployment[]
+}
+
+// ─── Deployments ──────────────────────────────────────────────────────────────
+
+model Deployment {
+  id            String   @id @default(cuid())
+  previewId     String?
+  preview       Preview? @relation(fields: [previewId], references: [id])
+  commitId      String?
+  commit        Commit?  @relation(fields: [commitId], references: [id])
+  status        String   @default("pending") // pending | building | ready | failed
+  provider      String   @default("demo")   // demo | vercel | netlify | cloudflare
+  deploymentUrl String?
+  branch        String?
+  docVersion    String?
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ─── Documentation Pages ──────────────────────────────────────────────────────
+
+model DocumentationPage {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id])
+  knowledgeAreaId String?
+  knowledgeArea   KnowledgeArea? @relation(fields: [knowledgeAreaId], references: [id])
+  slug            String
+  title           String
+  content         String   // markdown
+  status          String   @default("draft") // draft | published
+  version         String   @default("1.0.0")
+  publishedAt     DateTime?
+  publishedCommit String?
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([projectId, slug])
+}
+
+// ─── Agent Knowledge ──────────────────────────────────────────────────────────
+
+model AgentKnowledge {
+  id              String   @id @default(cuid())
+  projectId       String
+  knowledgeVersion String
+  sourceCommit    String?
+  docVersion      String?
+  indexedAt       DateTime @default(now())
+  pagesIndexed    Int      @default(0)
+  chunksIndexed   Int      @default(0)
+  provider        String   @default("demo") // demo | openai | anthropic | cohere
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  chunks          AgentKnowledgeChunk[]
+}
+
+model AgentKnowledgeChunk {
+  id               String   @id @default(cuid())
+  agentKnowledgeId String
+  agentKnowledge   AgentKnowledge @relation(fields: [agentKnowledgeId], references: [id])
+  pageSlug         String
+  pageTitle        String
+  chunkIndex       Int
+  content          String
+  embedding        String?  // JSON array of floats (stored as text for SQLite compat)
+  createdAt        DateTime @default(now())
+}
+
+// ─── Audit Events ─────────────────────────────────────────────────────────────
+
+model AuditEvent {
+  id              String   @id @default(cuid())
+  productChangeId String?
+  productChange   ProductChange? @relation(fields: [productChangeId], references: [id])
+  actorId         String?
+  actor           User?    @relation(fields: [actorId], references: [id])
+  eventType       String   // change_detected | analysis_completed | evidence_reviewed | impact_report_generated | task_created | proposal_generated | proposal_edited | proposal_approved | proposal_rejected | preview_generated | preview_reviewed | documentation_merged | deployment_published | agent_knowledge_synchronized
+  summary         String
+  detail          String?  // JSON blob with extra context
+  occurredAt      DateTime @default(now())
+}

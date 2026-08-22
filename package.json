@@ -1,0 +1,13 @@
+{
+  "name": "synchack",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix thally run dev",
+    "build": "npm --prefix thally run build",
+    "start": "npm --prefix thally run start",
+    "test": "npm --prefix thally test",
+    "typecheck": "npm --prefix thally run typecheck",
+    "seed": "npm --prefix thally run prisma:seed"
+  }
+}
