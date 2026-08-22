@@ -1,7 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────────── */
 :root {
+  --void: #050811;
+  --panel: rgba(12, 20, 35, 0.78);
+  --line: rgba(143, 185, 220, 0.16);
+  --cyan: #63f5ff;
+  --pink: #ff5db1;
+  --violet: #a78bfa;
+  --green: #7dffbd;
+  --orange: #ffb86b;
+  --muted: #8192ab;
+  --text: #eef6ff;
+
   /* Colors — Brand */
   --color-brand-50: #f0f4ff;
   --color-brand-100: #e0e9ff;
@@ -2371,3 +2382,232 @@ pre, code {
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
+
+/* ─── Cyber Neon Theme & Hero Orbit System ────────────────────────────────── */
+.neon-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  background: rgba(99, 245, 255, 0.12);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.neon-button:hover {
+  background: rgba(99, 245, 255, 0.22);
+  box-shadow: 0 0 20px rgba(99, 245, 255, 0.4);
+  color: #ffffff;
+}
+
+.solid-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--cyan);
+  color: #050811;
+  background: var(--cyan);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.solid-button:hover {
+  background: #a5f9ff;
+  box-shadow: 0 0 20px rgba(99, 245, 255, 0.5);
+}
+
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ghost-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(143, 185, 220, 0.35);
+}
+
+.hero-banner {
+  min-height: 340px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  padding: 42px 48px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(99, 245, 255, 0.25);
+  background: linear-gradient(110deg, rgba(10, 39, 55, 0.88), rgba(13, 20, 43, 0.72) 55%, rgba(42, 11, 43, 0.55));
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+}
+
+.hero-copy {
+  max-width: 680px;
+  z-index: 2;
+  position: relative;
+}
+
+.hero-copy h2 {
+  margin: 16px 0;
+  font-size: clamp(32px, 4.5vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.hero-copy h2 b {
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(99, 245, 255, 0.4);
+}
+
+.hero-visual {
+  position: absolute;
+  right: 6%;
+  top: 20px;
+  width: 280px;
+  height: 280px;
+  pointer-events: none;
+}
+
+.core {
+  position: absolute;
+  inset: 86px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border: 1px solid rgba(99, 245, 255, 0.8);
+  border-radius: 50%;
+  color: var(--cyan);
+  background: radial-gradient(circle, rgba(99, 245, 255, 0.18), rgba(4, 12, 26, 0.9) 65%);
+  box-shadow: 0 0 35px rgba(99, 245, 255, 0.35);
+  animation: float 5s ease-in-out infinite;
+}
+
+.orbit {
+  position: absolute;
+  inset: 32px;
+  border: 1px dashed rgba(99, 245, 255, 0.35);
+  border-radius: 50%;
+  animation: spin 16s linear infinite;
+}
+
+.orbit-two {
+  inset: 58px;
+  border: 1px solid rgba(255, 93, 177, 0.35);
+  border-radius: 50%;
+  animation: spin 12s linear infinite reverse;
+}
+
+.query-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 18px;
+  border: 1px solid rgba(99, 245, 255, 0.35);
+  background: rgba(8, 20, 32, 0.85);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.query-box input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font-size: 14px;
+}
+
+.query-box input::placeholder {
+  color: var(--muted);
+}
+
+.citation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.citation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  color: var(--cyan);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  border-radius: 8px;
+  background: var(--panel);
+  transition: all 0.2s ease;
+}
+
+.citation:hover {
+  border-color: var(--cyan);
+  background: rgba(12, 28, 50, 0.85);
+  box-shadow: 0 0 15px rgba(99, 245, 255, 0.15);
+}
+
+.system-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(125, 255, 189, 0.1);
+  border: 1px solid rgba(125, 255, 189, 0.3);
+  color: var(--green);
+}
+
+.system-status-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(125, 255, 189, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(125, 255, 189, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(125, 255, 189, 0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+

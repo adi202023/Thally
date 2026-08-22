@@ -145,10 +145,17 @@ export function CommandPalette({
 
   return (
     <div className="command-palette-overlay" onClick={onClose}>
-      <div className="command-palette" onClick={(e) => e.stopPropagation()}>
+      <div
+        id="command-palette-modal"
+        data-testid="command-palette-modal"
+        className="command-palette"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="command-palette-search">
           <Search size={18} className="text-tertiary" />
           <input
+            id="command-palette-input"
+            data-testid="command-palette-input"
             autoFocus
             type="text"
             placeholder="Type a command or search workflow..."

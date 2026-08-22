@@ -86,8 +86,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`app-sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
-        <Link href="/" className="sidebar-logo">
+      <aside
+        id="app-sidebar"
+        data-testid="app-sidebar"
+        className={`app-sidebar ${isMobileMenuOpen ? 'open' : ''}`}
+      >
+        <Link
+          href="/"
+          id="brand-home-link"
+          data-testid="brand-home-link"
+          className="sidebar-logo"
+        >
           <div className="sidebar-logo-mark">T</div>
           <div>
             <div className="sidebar-logo-text">Thally</div>
@@ -95,15 +104,36 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </Link>
 
+        {/* System Status Chip */}
+        <div className="px-4 py-1">
+          <div
+            id="system-status-chip"
+            data-testid="system-status-chip"
+            className="system-status-chip w-full justify-between"
+            title="Connected to Thally Engine • All systems operational"
+          >
+            <div className="flex items-center gap-2">
+              <span className="dot" />
+              <span>CONTROL PLANE ONLINE</span>
+            </div>
+            <span className="text-[10px] text-muted">v1.1.0</span>
+          </div>
+        </div>
+
         {/* Demo Mode Badge */}
-        <div className="sidebar-mode-badge" title="Running in safe Demo Mode. Set DEMO_MODE=false to connect real repositories and AI.">
+        <div
+          className="sidebar-mode-badge mx-4 mt-2"
+          title="Running in safe Demo Mode. Set DEMO_MODE=false to connect real repositories and AI."
+        >
           <span className="dot" />
           <span>Demo Knowledge Analysis</span>
         </div>
 
         {/* Search / Command trigger */}
-        <div className="px-4 py-2">
+        <div className="px-4 py-2 mt-1">
           <button
+            id="command-palette-trigger"
+            data-testid="command-palette-trigger"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="w-full flex items-center justify-between px-3 py-2 text-xs text-secondary bg-surface-2 border border-default rounded hover:border-brand transition-all"
           >
@@ -164,15 +194,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="lg:hidden p-4 bg-surface-0 border-b border-subtle flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
+              id="mobile-menu-button"
+              data-testid="mobile-menu-button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="btn-icon btn-ghost"
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <span className="font-bold text-md">Thally</span>
+            <span className="font-bold text-md text-text">Thally</span>
           </div>
           <button
+            id="mobile-search-button"
+            data-testid="mobile-search-button"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="btn-icon btn-secondary btn-xs"
             aria-label="Search"

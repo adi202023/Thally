@@ -221,23 +221,26 @@ export default function AgentKnowledgePage() {
             }}
             className="flex items-center p-3 gap-3"
           >
-            <Bot size={20} className="text-brand flex-shrink-0 ml-2" />
+            <Bot size={20} className="text-cyan flex-shrink-0 ml-2" />
             <input
+              id="agent-query-input"
+              data-testid="agent-query-input"
               type="text"
               className="flex-1 bg-transparent border-none outline-none text-sm text-primary"
               placeholder="Ask a question about the product or documentation..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <Button
+            <button
+              id="agent-submit-button"
+              data-testid="agent-submit-button"
               type="submit"
-              variant="primary"
-              size="sm"
-              isLoading={isQuerying}
-              leftIcon={<Send size={14} />}
+              disabled={isQuerying}
+              className="neon-button"
             >
-              Ask Agent
-            </Button>
+              <Send size={14} />
+              <span>{isQuerying ? 'Querying...' : 'Ask Agent'}</span>
+            </button>
           </form>
 
           <div className="px-4 pb-3 flex items-center gap-2 overflow-x-auto">
@@ -255,7 +258,11 @@ export default function AgentKnowledgePage() {
         </div>
 
         {/* Agent Answer Frame */}
-        <Card className="overflow-hidden">
+        <Card
+          id="agent-answer-panel"
+          data-testid="agent-answer-panel"
+          className="overflow-hidden"
+        >
           <div className="agent-answer-header">
             <div className="flex items-center gap-2">
               <Bot size={18} className="text-brand" />
@@ -286,22 +293,32 @@ export default function AgentKnowledgePage() {
                 <span className="text-xs font-bold text-tertiary uppercase tracking-wider block mb-2">
                   Traceable Citation Sources (Verified Documentation)
                 </span>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {response.citations.map((cite, idx) => (
-                    <Link
-                      key={idx}
-                      href={`/docs/${cite.pageSlug}`}
-                      className="p-3 bg-surface-1 hover:bg-brand-50 border border-subtle hover:border-brand-200 rounded-lg no-underline transition-all flex flex-col gap-1"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-brand">
-                        <span>{cite.pageTitle}</span>
-                        <ExternalLink size={12} />
-                      </div>
-                      <p className="text-xs text-secondary italic">
-                        &quot;{cite.excerpt}&quot;
-                      </p>
-                    </Link>
-                  ))}
+                <div className="citation-grid">
+                  {response.citations.map((cite, idx) => {
+                    const testId = cite.pageSlug === 'smart-sync'
+                      ? 'citation-smart-sync'
+                      : cite.pageSlug === 'permissions'
+                      ? 'citation-permissions'
+                      : `citation-${cite.pageSlug}`;
+
+                    return (
+                      <Link
+                        key={idx}
+                        id={testId}
+                        data-testid={testId}
+                        href={`/docs/${cite.pageSlug}`}
+                        className="citation"
+                      >
+                        <div className="flex items-center justify-between text-xs font-semibold text-cyan">
+                          <span>{cite.pageTitle}</span>
+                          <ExternalLink size={12} />
+                        </div>
+                        <p className="text-xs text-secondary italic mb-0">
+                          &quot;{cite.excerpt}&quot;
+                        </p>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -61,7 +61,9 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="page-title">THALLY</h1>
-            <Badge variant="brand" dot>Live System Active</Badge>
+            <span className="system-status-chip">
+              <span className="dot" /> LIVE SYSTEM ACTIVE
+            </span>
           </div>
           <p className="page-subtitle font-medium text-secondary">
             Keep product knowledge synchronized with product reality.
@@ -73,49 +75,99 @@ export default function DashboardPage() {
               Verification Report
             </Button>
           </Link>
-          <Button
-            variant="primary"
-            size="sm"
-            isLoading={isAnalyzing}
+          <button
+            id="run-analysis-button"
+            data-testid="run-analysis-button"
             onClick={handleRunAnalysis}
-            leftIcon={<Sparkles size={14} />}
+            disabled={isAnalyzing}
+            className="neon-button"
           >
-            Run Knowledge Analysis
-          </Button>
+            <Sparkles size={14} />
+            <span>{isAnalyzing ? 'Analyzing...' : 'Run Knowledge Analysis'}</span>
+          </button>
         </div>
       </header>
 
       <main className="page-content flex flex-col gap-6">
+        {/* Animated Cyber Smart Sync Hero Banner */}
+        <section className="hero-banner" aria-label="Smart Sync Overview">
+          <div className="hero-copy">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="system-status-chip">
+                <span className="dot" /> SMART SYNC ENGINE ACTIVE
+              </span>
+              <span className="text-xs text-muted font-mono">v1.1.0 • AUTO-INDEXED</span>
+            </div>
+            <h2>
+              Keep product knowledge <b>synchronized</b> with product reality.
+            </h2>
+            <p className="text-secondary text-sm leading-relaxed mb-6">
+              Thally detects code changes, extracts multi-modal AST evidence, generates human-gated proposals, and publishes verified context to live docs and AI agents.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={handleRunAnalysis}
+                className="neon-button"
+              >
+                <Sparkles size={14} /> Run Knowledge Analysis
+              </button>
+              <Link
+                href="/review/proposal-smartsync-001"
+                id="review-proposal-button"
+                data-testid="review-proposal-button"
+                className="solid-button"
+              >
+                <FileText size={14} /> Review Proposal
+              </Link>
+              <Link
+                href="/changes/change-smartsync-001/evidence"
+                id="view-evidence-button"
+                data-testid="view-evidence-button"
+                className="ghost-button"
+              >
+                <FileSearch size={14} /> View 14 Evidence Items
+              </Link>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="orbit" />
+            <div className="orbit orbit-two" />
+            <div className="core">
+              <Sparkles size={32} />
+            </div>
+          </div>
+        </section>
+
         {/* Metric Cards Grid */}
         <section className="stats-grid" aria-label="System Metrics">
           <div className="stat-card">
             <div className="stat-label">Product Changes</div>
-            <div className="stat-value">1</div>
+            <strong>1</strong>
             <div className="stat-change neutral">Active repository branch</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Knowledge Areas</div>
-            <div className="stat-value">10</div>
+            <strong>10</strong>
             <div className="stat-change up">6 Definitely Affected</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Source Evidence</div>
-            <div className="stat-value">14</div>
+            <strong>14</strong>
             <div className="stat-change up">Traceable items</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Open Reviews</div>
-            <div className="stat-value">1</div>
+            <strong>1</strong>
             <div className="stat-change up">Human-in-the-loop</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Published Docs</div>
-            <div className="stat-value">v1.1.0</div>
+            <strong>v1.1.0</strong>
             <div className="stat-change up">Live on /docs</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Agent Knowledge</div>
-            <div className="stat-value">47</div>
+            <strong>47</strong>
             <div className="stat-change up">Chunks synchronized ✓</div>
           </div>
         </section>
@@ -156,7 +208,11 @@ export default function DashboardPage() {
             </div>
 
             {/* End-to-end Workflow Pipeline */}
-            <div className="p-3 bg-surface-1 border border-subtle rounded-lg mb-4">
+            <div
+              id="sync-pipeline"
+              data-testid="sync-pipeline"
+              className="p-3 bg-surface-1 border border-subtle rounded-lg mb-4"
+            >
               <div className="flex items-center justify-between px-2 pb-2 border-b border-subtle">
                 <span className="text-xs font-semibold text-secondary">SYNCHRONIZATION PIPELINE</span>
                 <span className="text-xs text-tertiary">10-Stage Lifecycle</span>
@@ -195,7 +251,12 @@ export default function DashboardPage() {
                 <Layers size={16} className="text-brand" />
                 <CardTitle>Knowledge Areas Classification</CardTitle>
               </div>
-              <Link href="/changes/change-smartsync-001/report" className="text-xs text-brand font-medium hover:underline">
+              <Link
+                href="/changes/change-smartsync-001/report"
+                id="impact-report-link"
+                data-testid="impact-report-link"
+                className="text-xs text-brand font-medium hover:underline"
+              >
                 Full Report →
               </Link>
             </CardHeader>
@@ -246,7 +307,12 @@ export default function DashboardPage() {
                 <History size={16} className="text-brand" />
                 <CardTitle>Recent Audit Trail</CardTitle>
               </div>
-              <Link href="/audit" className="text-xs text-brand font-medium hover:underline">
+              <Link
+                href="/audit"
+                id="audit-trail-link"
+                data-testid="audit-trail-link"
+                className="text-xs text-brand font-medium hover:underline"
+              >
                 View All 13 Events →
               </Link>
             </CardHeader>
