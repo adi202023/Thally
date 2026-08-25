@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm --prefix thally run build",
+  "outputDirectory": "thally/.next",
+  "framework": "nextjs"
+}
