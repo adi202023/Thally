@@ -1,4 +1,0 @@
-{
-  "buildCommand": "cd thally && npx prisma generate && npm run build",
-  "outputDirectory": "thally/.next"
-}
