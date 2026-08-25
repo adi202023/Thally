@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   CircleDot,
   ArrowUpRight,
@@ -87,7 +88,7 @@ export function Pipeline({ current = 8 }: { current?: number }) {
               index < current
                 ? 'done'
                 : index === current
-                ? 'current'
+                ? 'active'
                 : ''
             }`}
           >
@@ -98,11 +99,7 @@ export function Pipeline({ current = 8 }: { current?: number }) {
             )}
           </div>
 
-          <small>{step}</small>
-
-          {index < steps.length - 1 && (
-            <i className={index < current ? 'done' : ''} />
-          )}
+          <i>{step}</i>
         </div>
       ))}
     </div>
@@ -110,6 +107,9 @@ export function Pipeline({ current = 8 }: { current?: number }) {
 }
 
 export function WorkspaceView({ type }: { type: string }) {
+  const router = useRouter();
+  const [feedback, setFeedback] = useState<string | null>(null);
+
   const configs: Record<string, [string, string, string, React.ComponentType<{ size?: number }>]> = {
     changes: [
       'changes / active',
@@ -196,6 +196,39 @@ export function WorkspaceView({ type }: { type: string }) {
           'Human maintainer review required',
         ];
 
+  const handlePrimaryAction = () => {
+    if (type === 'review') {
+      setFeedback('Approved! Directing to preview...');
+      setTimeout(() => router.push('/preview'), 600);
+    } else if (type === 'preview') {
+      setFeedback('Deployment verified! Directing to verification...');
+      setTimeout(() => router.push('/verification'), 600);
+    } else if (type === 'changes') {
+      router.push('/impact');
+    } else if (type === 'evidence') {
+      router.push('/review');
+    } else if (type === 'verification') {
+      router.push('/docs');
+    } else {
+      router.push('/impact');
+    }
+  };
+
+  const handleRowClick = (item: string) => {
+    if (type === 'changes') {
+      router.push('/impact');
+    } else if (type === 'evidence') {
+      router.push('/review');
+    } else if (type === 'review') {
+      router.push('/preview');
+    } else if (type === 'preview') {
+      router.push('/verification');
+    } else {
+      setFeedback(`Selected: ${item}`);
+      setTimeout(() => setFeedback(null), 2500);
+    }
+  };
+
   return (
     <>
       <Header
@@ -206,14 +239,24 @@ export function WorkspaceView({ type }: { type: string }) {
           label:
             type === 'review'
               ? 'Approve & generate preview'
+              : type === 'preview'
+              ? 'Verify deployment'
+              : type === 'changes'
+              ? 'Analyze impact'
               : 'Open live workspace',
           icon: <Zap size={15} />,
-          onClick: () => {},
+          onClick: handlePrimaryAction,
         }}
         actionTestId={`${type}-primary-action`}
       />
 
       <div className="page-content">
+        {feedback && (
+          <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary dark:text-primary-fixed-dim font-medium">
+            {feedback}
+          </div>
+        )}
+
         <section className="panel feature-panel">
           <div className="feature-icon">
             <Icon size={24} />
@@ -247,6 +290,7 @@ export function WorkspaceView({ type }: { type: string }) {
                 className="workspace-row"
                 key={row}
                 data-testid={`${type}-row-${index}`}
+                onClick={() => handleRowClick(row)}
               >
                 <span className="row-index">0{index + 1}</span>
 
@@ -280,7 +324,7 @@ export function WorkspaceView({ type }: { type: string }) {
             <span className="terminal-dot green" />
           </div>
 
-          <p>
+          <p className="p-4 m-0">
             <span className="green-text">thally@control-plane</span>
             :~$ trace --change <b>a3f8c2d</b>
             <br />

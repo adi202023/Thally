@@ -18,7 +18,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <main className="md:ml-20 min-h-screen px-4 md:px-margin-page py-section-gap max-w-[1400px] mx-auto pb-32">
+      <main className="min-h-screen px-4 md:px-10 py-section-gap pb-32">
         {/* Dashboard Header */}
         <header className="mb-12 fade-in-up">
           <div className="flex items-center gap-3 mb-2">
