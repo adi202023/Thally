@@ -14,9 +14,9 @@ import {
   ShieldCheck,
   ArrowLeft,
   ArrowRight,
+  Zap,
 } from 'lucide-react';
-import { Badge } from '@/components/design-system/Badge';
-import { CodeBlock } from '@/components/design-system/CodeBlock';
+import { Header } from '@/components/WorkspaceView';
 
 const DOCS_DATA: Record<
   string,
@@ -327,96 +327,128 @@ export default function DocPage() {
 
   return (
     <>
-      <article className="docs-content">
-        {/* Breadcrumb & Meta */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-xs text-tertiary">
-            <Link href="/docs">Docs</Link>
-            <span>/</span>
-            <span className="text-primary font-medium">{doc.title}</span>
-          </div>
+      <Header
+        eyebrow={`docs / ${slug}`}
+        title={doc.title}
+        subtitle={`Verified published documentation · v${doc.version} (commit ${doc.publishedCommit})`}
+        action={{
+          label: 'Back to Docs',
+          icon: <ArrowLeft size={15} />,
+          onClick: () => {
+            window.location.href = '/docs';
+          },
+        }}
+        actionTestId="back-to-docs-button"
+      />
 
-          <div className="flex items-center gap-2">
-            <Badge variant="success" dot>Published</Badge>
-            <Badge variant="default">v{doc.version}</Badge>
-          </div>
+      <div className="page-content">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-8">
+          <article className="panel p-6 sm:p-8">
+            {/* Meta header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-[rgba(143,185,220,0.12)]">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#8192ab]">
+                <Link href="/docs" className="text-[#63f5ff] hover:underline">
+                  Docs
+                </Link>
+                <span>/</span>
+                <span className="text-[#eef6ff]">{doc.title}</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[rgba(125,255,189,0.1)] border border-[rgba(125,255,189,0.3)] text-[#7dffbd]">
+                  PUBLISHED
+                </span>
+                <span className="text-[10px] font-mono text-[#8192ab]">
+                  v{doc.version}
+                </span>
+              </div>
+            </div>
+
+            {/* Commit bar */}
+            <div className="p-3 mb-6 bg-[rgba(5,8,17,0.7)] border border-[rgba(143,185,220,0.12)] rounded-lg flex flex-wrap items-center justify-between gap-3 text-xs text-[#8192ab] font-mono">
+              <div className="flex items-center gap-2">
+                <GitCommit size={14} className="text-[#63f5ff]" />
+                <span>
+                  Published commit: <code className="text-[#63f5ff]">{doc.publishedCommit}</code>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={14} />
+                <span>Updated: {doc.updatedAt}</span>
+              </div>
+            </div>
+
+            {/* Prose Content */}
+            <div
+              className="docs-prose prose-invert"
+              dangerouslySetInnerHTML={{ __html: renderRichMarkdown(doc.content) }}
+            />
+
+            {/* Nav prev/next */}
+            <div className="flex items-center justify-between gap-4 mt-10 pt-6 border-t border-[rgba(143,185,220,0.12)]">
+              {doc.prev ? (
+                <Link
+                  href={`/docs/${doc.prev.slug}`}
+                  className="flex items-center gap-2 text-xs font-semibold text-[#8192ab] hover:text-[#63f5ff] transition-colors"
+                >
+                  <ArrowLeft size={14} />
+                  <span>{doc.prev.title}</span>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {doc.next ? (
+                <Link
+                  href={`/docs/${doc.next.slug}`}
+                  className="flex items-center gap-2 text-xs font-semibold text-[#63f5ff] hover:underline"
+                >
+                  <span>{doc.next.title}</span>
+                  <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <div />
+              )}
+            </div>
+          </article>
+
+          {/* Sticky TOC */}
+          <aside className="panel p-5 h-fit sticky top-24 hidden lg:block">
+            <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#8192ab] mb-3">
+              On this page
+            </h4>
+            <nav className="flex flex-col gap-2 text-xs">
+              {doc.toc.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className={`text-[#8192ab] hover:text-[#63f5ff] transition-colors ${
+                    item.level === 3 ? 'pl-3 text-[11px]' : ''
+                  }`}
+                >
+                  {item.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
         </div>
-
-        {/* Commit & Date Stamp */}
-        <div className="p-3 mb-6 bg-surface-0 border border-subtle rounded-lg flex items-center justify-between text-xs text-tertiary">
-          <div className="flex items-center gap-2">
-            <GitCommit size={14} className="text-brand" />
-            <span>Published commit: <code>{doc.publishedCommit}</code></span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar size={14} />
-            <span>Updated: {doc.updatedAt}</span>
-          </div>
-        </div>
-
-        {/* Rendered Prose Content */}
-        <div
-          className="docs-prose"
-          dangerouslySetInnerHTML={{ __html: renderRichMarkdown(doc.content) }}
-        />
-
-        {/* Previous / Next Navigation */}
-        <div className="docs-page-nav">
-          {doc.prev ? (
-            <Link href={`/docs/${doc.prev.slug}`} className="docs-page-nav-item prev">
-              <span className="docs-page-nav-dir">
-                <ArrowLeft size={12} /> Previous
-              </span>
-              <span className="docs-page-nav-title">{doc.prev.title}</span>
-            </Link>
-          ) : (
-            <div />
-          )}
-
-          {doc.next ? (
-            <Link href={`/docs/${doc.next.slug}`} className="docs-page-nav-item next">
-              <span className="docs-page-nav-dir">
-                Next <ArrowRight size={12} />
-              </span>
-              <span className="docs-page-nav-title">{doc.next.title}</span>
-            </Link>
-          ) : (
-            <div />
-          )}
-        </div>
-      </article>
-
-      {/* Table of Contents (Sticky right side) */}
-      <aside className="docs-toc">
-        <div className="docs-toc-title">On this page</div>
-        <nav className="flex flex-col gap-1">
-          {doc.toc.map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              className={`docs-toc-item ${item.level === 3 ? 'level-3' : ''}`}
-            >
-              {item.title}
-            </a>
-          ))}
-        </nav>
-      </aside>
+      </div>
     </>
   );
 }
 
 function renderRichMarkdown(md: string): string {
   return md
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/^## (.*?) \{#(.*?)\}$/gim, '<h2 id="$2">$1</h2>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/```http\n([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-    .replace(/```json\n([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-    .replace(/```\n([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-    .replace(/`([^`]+)`/gim, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
-    .replace(/\n\n/gim, '<br/><br/>');
+    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-extrabold text-[#eef6ff] mb-4">$1</h1>')
+    .replace(/^## (.*?) \{#(.*?)\}$/gim, '<h2 id="$2" class="text-xl font-bold text-[#eef6ff] mt-6 mb-3 pt-4 border-t border-[rgba(143,185,220,0.1)]">$1</h2>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-[#eef6ff] mt-6 mb-3 pt-4 border-t border-[rgba(143,185,220,0.1)]">$1</h2>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-base font-semibold text-[#63f5ff] mt-4 mb-2">$1</h3>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong class="text-[#eef6ff] font-bold">$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em class="text-[#8192ab]">$1</em>')
+    .replace(/```http\n([\s\S]*?)```/gim, '<pre class="p-4 rounded-lg bg-[#03060c] border border-[rgba(143,185,220,0.16)] font-mono text-xs text-[#7dffbd] overflow-x-auto my-3"><code>$1</code></pre>')
+    .replace(/```json\n([\s\S]*?)```/gim, '<pre class="p-4 rounded-lg bg-[#03060c] border border-[rgba(143,185,220,0.16)] font-mono text-xs text-[#63f5ff] overflow-x-auto my-3"><code>$1</code></pre>')
+    .replace(/```\n([\s\S]*?)```/gim, '<pre class="p-4 rounded-lg bg-[#03060c] border border-[rgba(143,185,220,0.16)] font-mono text-xs text-[#eef6ff] overflow-x-auto my-3"><code>$1</code></pre>')
+    .replace(/`([^`]+)`/gim, '<code class="px-1.5 py-0.5 rounded bg-[rgba(99,245,255,0.1)] border border-[rgba(99,245,255,0.25)] text-[#63f5ff] font-mono text-xs">$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-[#63f5ff] underline">$1</a>')
+    .replace(/\n\n/gim, '<p class="text-sm text-[#8192ab] leading-relaxed mb-4"></p>');
 }

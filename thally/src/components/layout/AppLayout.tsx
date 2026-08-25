@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -8,221 +8,214 @@ import {
   GitCommit,
   Sparkles,
   FileSearch,
-  FileText,
-  Eye,
+  FileCheck2,
+  Cloud,
   BookOpen,
   Bot,
   History,
-  CheckCircle2,
+  ShieldCheck,
   Search,
+  Command,
+  ChevronRight,
   Menu,
   X,
-  ExternalLink,
-  ShieldCheck,
+  Zap,
 } from 'lucide-react';
-import { CommandPalette } from '@/components/design-system/CommandPalette';
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-  badge?: string;
-  external?: boolean;
-}
-
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
+const nav = [
+  ['Command Center', '/', LayoutDashboard],
+  ['Product Changes', '/changes', GitCommit, '01'],
+  ['Impact Analysis', '/impact', Sparkles],
+  ['Source Evidence', '/evidence', FileSearch, '14'],
+  ['Proposal Review', '/review', FileCheck2, '1'],
+  ['Deployment Preview', '/preview', Cloud],
+  ['Documentation', '/docs', BookOpen],
+  ['Agent Knowledge', '/agent', Bot],
+  ['Audit Trail', '/audit', History],
+  ['Verification', '/verification', ShieldCheck],
+] as const;
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [palette, setPalette] = useState(false);
 
-  // If on /docs path, we render docs layout independently
-  const isDocs = pathname?.startsWith('/docs');
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPalette(false);
+      }
 
-  if (isDocs) {
-    return <>{children}</>;
-  }
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === 'k'
+      ) {
+        event.preventDefault();
+        setPalette(true);
+      }
+    };
 
-  const navItems: NavGroup[] = [
-    {
-      label: 'OVERVIEW',
-      items: [
-        { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={16} /> },
-        { label: 'Product Changes', href: '/changes/change-smartsync-001', icon: <GitCommit size={16} />, badge: '1 active' },
-      ],
-    },
-    {
-      label: 'KNOWLEDGE PIPELINE',
-      items: [
-        { label: 'Impact Analysis', href: '/changes/change-smartsync-001/report', icon: <Sparkles size={16} /> },
-        { label: 'Source Evidence', href: '/changes/change-smartsync-001/evidence', icon: <FileSearch size={16} />, badge: '14' },
-        { label: 'Proposal Review', href: '/review/proposal-smartsync-001', icon: <FileText size={16} />, badge: 'Needs Review' },
-        { label: 'Deployment Preview', href: '/preview/preview-smartsync-001', icon: <Eye size={16} /> },
-      ],
-    },
-    {
-      label: 'PUBLICATION & AGENT',
-      items: [
-        { label: 'Documentation Site', href: '/docs', icon: <BookOpen size={16} />, external: false },
-        { label: 'Agent Knowledge', href: '/agent', icon: <Bot size={16} /> },
-        { label: 'Audit Trail', href: '/audit', icon: <History size={16} /> },
-        { label: 'Final Verification', href: '/verification', icon: <CheckCircle2 size={16} /> },
-      ],
-    },
-  ];
+    window.addEventListener('keydown', key);
+    return () => {
+      window.removeEventListener('keydown', key);
+    };
+  }, []);
 
   return (
     <div className="app-shell">
-      {/* Mobile Backdrop */}
-      {isMobileMenuOpen && (
-        <div
-          className="drawer-overlay lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
+      <div className="ambient-orb orb-cyan" />
+      <div className="ambient-orb orb-pink" />
+
+      {open && (
+        <button
+          className="mobile-scrim"
+          data-testid="mobile-menu-scrim"
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        id="app-sidebar"
+        className={`sidebar ${open ? 'is-open' : ''}`}
         data-testid="app-sidebar"
-        className={`app-sidebar ${isMobileMenuOpen ? 'open' : ''}`}
       >
         <Link
           href="/"
-          id="brand-home-link"
+          className="brand"
           data-testid="brand-home-link"
-          className="sidebar-logo"
         >
-          <div className="sidebar-logo-mark">T</div>
-          <div>
-            <div className="sidebar-logo-text">Thally</div>
-            <div className="sidebar-logo-tag">Product Knowledge Engine</div>
-          </div>
+          <span className="brand-mark">
+            <Zap size={19} />
+          </span>
+
+          <span>
+            <b>THALLY</b>
+            <small>product knowledge engine</small>
+          </span>
         </Link>
 
-        {/* System Status Chip */}
-        <div className="px-4 py-1">
-          <div
-            id="system-status-chip"
-            data-testid="system-status-chip"
-            className="system-status-chip w-full justify-between"
-            title="Connected to Thally Engine • All systems operational"
-          >
-            <div className="flex items-center gap-2">
-              <span className="dot" />
-              <span>CONTROL PLANE ONLINE</span>
-            </div>
-            <span className="text-[10px] text-muted">v1.1.0</span>
-          </div>
-        </div>
-
-        {/* Demo Mode Badge */}
         <div
-          className="sidebar-mode-badge mx-4 mt-2"
-          title="Running in safe Demo Mode. Set DEMO_MODE=false to connect real repositories and AI."
+          className="system-chip"
+          data-testid="system-status-chip"
         >
-          <span className="dot" />
-          <span>Demo Knowledge Analysis</span>
+          <span className="pulse-dot" />
+          SYSTEM ONLINE
+          <span className="chip-version">v1.1.0</span>
         </div>
 
-        {/* Search / Command trigger */}
-        <div className="px-4 py-2 mt-1">
-          <button
-            id="command-palette-trigger"
-            data-testid="command-palette-trigger"
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-2 text-xs text-secondary bg-surface-2 border border-default rounded hover:border-brand transition-all"
-          >
-            <div className="flex items-center gap-2">
-              <Search size={13} className="text-tertiary" />
-              <span>Search or command...</span>
-            </div>
-            <span className="command-palette-key">⌘K</span>
-          </button>
-        </div>
+        <button
+          className="search-trigger"
+          data-testid="command-palette-trigger"
+          onClick={() => setPalette(true)}
+        >
+          <Search size={15} />
+          Search command center
+          <kbd>⌘ K</kbd>
+        </button>
 
-        {/* Nav Links */}
-        <nav className="sidebar-nav">
-          {navItems.map((group, gIdx) => (
-            <div key={gIdx} className="mb-2">
-              <div className="sidebar-section-label">{group.label}</div>
-              {group.items.map((item) => {
-                const isActive =
-                  item.href === '/'
-                    ? pathname === '/'
-                    : pathname.startsWith(item.href);
+        <nav
+          className="side-nav"
+          aria-label="Main navigation"
+        >
+          {nav.map(([label, to, Icon, badge]) => {
+            const isActive =
+              to === '/' ? pathname === '/' : pathname.startsWith(to);
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="sidebar-nav-badge">{item.badge}</span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+            return (
+              <Link
+                key={to}
+                href={to}
+                onClick={() => setOpen(false)}
+                className={`nav-item ${isActive ? 'active' : ''}`}
+                data-testid={`nav-${label
+                  .toLowerCase()
+                  .replaceAll(' ', '-')}`}
+              >
+                <Icon size={16} />
+                <span>{label}</span>
+                {badge && <em>{badge}</em>}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="sidebar-footer">
-          <div className="sidebar-avatar">AC</div>
-          <div className="min-w-0 flex-1">
-            <div className="sidebar-user-name">Alex Chen</div>
-            <div className="sidebar-user-role">Maintainer • Demo Org</div>
+          <div className="avatar">AC</div>
+
+          <div>
+            <b>Alex Chen</b>
+            <small>Maintainer · Demo Org</small>
           </div>
-          <span title="project:write scope active">
-            <ShieldCheck size={14} className="text-success" />
-          </span>
+
+          <ShieldCheck
+            size={16}
+            className="success"
+          />
         </div>
       </aside>
 
-      {/* Main Container */}
-      <div className="app-main">
-        {/* Mobile Header Bar */}
-        <div className="lg:hidden p-4 bg-surface-0 border-b border-subtle flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              id="mobile-menu-button"
-              data-testid="mobile-menu-button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="btn-icon btn-ghost"
-              aria-label="Toggle navigation menu"
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <span className="font-bold text-md text-text">Thally</span>
-          </div>
+      <main className="main-area">
+        <header className="mobile-header">
           <button
-            id="mobile-search-button"
-            data-testid="mobile-search-button"
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="btn-icon btn-secondary btn-xs"
-            aria-label="Search"
+            data-testid="mobile-menu-button"
+            onClick={() => setOpen(!open)}
           >
-            <Search size={14} />
+            {open ? <X /> : <Menu />}
           </button>
-        </div>
+
+          <b>THALLY</b>
+
+          <button
+            data-testid="mobile-search-button"
+            onClick={() => setPalette(true)}
+          >
+            <Search />
+          </button>
+        </header>
 
         {children}
-      </div>
+      </main>
 
-      {/* Command Palette */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-      />
+      {palette && (
+        <div
+          className="palette-backdrop"
+          data-testid="command-palette-modal"
+          onClick={() => setPalette(false)}
+        >
+          <div
+            className="command-palette"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="palette-input">
+              <Command size={17} />
+
+              <input
+                autoFocus
+                placeholder="Jump to a workspace..."
+                data-testid="command-palette-input"
+              />
+
+              <kbd>ESC</kbd>
+            </div>
+
+            {nav.slice(0, 6).map(([label, to, Icon]) => (
+              <Link
+                key={to}
+                href={to}
+                onClick={() => setPalette(false)}
+                className="palette-item"
+                data-testid={`palette-${label
+                  .toLowerCase()
+                  .replaceAll(' ', '-')}`}
+              >
+                <Icon size={16} />
+                <span>{label}</span>
+                <ChevronRight size={14} />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

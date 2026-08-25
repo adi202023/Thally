@@ -8,105 +8,145 @@ import {
   ArrowRight,
   Shield,
   Code2,
-  HelpCircle,
   History,
   Sliders,
-  CheckCircle2,
+  Zap,
 } from 'lucide-react';
-import { Card, CardBody } from '@/components/design-system/Card';
-import { Badge } from '@/components/design-system/Badge';
+import { Header } from '@/components/WorkspaceView';
 
 export default function DocsHomePage() {
   const docCards = [
     {
+      title: 'Smart Sync Guide',
+      slug: 'smart-sync',
+      desc: 'Automated documentation synchronization based on selected repository sources and frequencies.',
+      icon: <Sparkles size={20} className="text-[#63f5ff]" />,
+      badge: 'New in v1.1.0',
+    },
+    {
       title: 'Getting Started',
       slug: 'getting-started',
       desc: 'Quickstart guide to connecting your repository and configuring knowledge areas.',
-      icon: <BookOpen size={20} className="text-brand" />,
+      icon: <BookOpen size={20} className="text-[#ff5db1]" />,
       badge: 'Quickstart',
-    },
-    {
-      title: 'Smart Sync',
-      slug: 'smart-sync',
-      desc: 'Automated documentation synchronization based on selected repository sources and frequencies.',
-      icon: <Sparkles size={20} className="text-purple-600" />,
-      badge: 'New in v1.1.0',
     },
     {
       title: 'Project Settings',
       slug: 'project-settings',
       desc: 'Configure repository webhooks, analysis sensitivity, and team assignments.',
-      icon: <Sliders size={20} className="text-secondary" />,
+      icon: <Sliders size={20} className="text-[#a78bfa]" />,
     },
     {
-      title: 'Permissions',
+      title: 'Permissions & Scopes',
       slug: 'permissions',
       desc: 'Role-based access control and scope requirements (including project:write).',
-      icon: <Shield size={20} className="text-error" />,
+      icon: <Shield size={20} className="text-[#ffb86b]" />,
     },
     {
       title: 'API Reference',
       slug: 'api-reference',
-      desc: 'REST API documentation, JWT authentication, endpoints, and rate limits.',
-      icon: <Code2 size={20} className="text-success" />,
+      desc: 'REST API documentation, JWT authentication, POST /v1/sync endpoints, and rate limits.',
+      icon: <Code2 size={20} className="text-[#7dffbd]" />,
     },
     {
       title: 'Changelog',
       slug: 'changelog',
       desc: 'Release notes and history, including Smart Sync v1.1.0 updates.',
-      icon: <History size={20} className="text-warning" />,
+      icon: <History size={20} className="text-[#63f5ff]" />,
       badge: 'v1.1.0 Live',
     },
   ];
 
   return (
-    <div className="docs-content">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <Badge variant="brand">Version 1.1.0 Published</Badge>
-          <Badge variant="success" dot>Synchronized with Product</Badge>
-        </div>
-        <h1 className="text-3xl font-extrabold text-primary mb-3">Thally Documentation Portal</h1>
-        <p className="text-md text-secondary leading-relaxed">
-          Welcome to the official developer and product documentation for Thally — kept synchronized with product changes via human-in-the-loop review.
-        </p>
-      </div>
+    <>
+      <Header
+        eyebrow="docs / published"
+        title="Documentation portal"
+        subtitle="Product knowledge, verified against reality and ready for humans."
+        action={{
+          label: 'Open live workspace',
+          icon: <Zap size={15} />,
+          onClick: () => {},
+        }}
+        actionTestId="docs-primary-action"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        {docCards.map((card) => (
-          <Link key={card.slug} href={`/docs/${card.slug}`} className="no-underline">
-            <Card hoverable className="h-full flex flex-col justify-between">
-              <CardBody className="p-5 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center">
-                    {card.icon}
-                  </div>
-                  {card.badge && <Badge variant="brand">{card.badge}</Badge>}
-                </div>
+      <div className="page-content">
+        <div className="max-w-5xl mx-auto">
+          {/* Centered Feature Banner */}
+          <section className="panel feature-panel mb-8">
+            <div className="feature-icon">
+              <BookOpen size={24} />
+            </div>
+
+            <div>
+              <span className="eyebrow">SMART SYNC · A3F8C2D</span>
+              <h2>Connected documentation sync</h2>
+              <p>
+                Thally watches the repository, traces meaningful change, and keeps the right knowledge moving.
+                Documentation is only published after all 7 deployment checks pass.
+              </p>
+            </div>
+          </section>
+
+          {/* Centered 2-Column Responsive Card Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            {docCards.map((card, index) => (
+              <Link
+                key={card.slug}
+                href={`/docs/${card.slug}`}
+                className="panel no-underline p-6 flex flex-col justify-between transition-all duration-200 hover:border-[#63f5ff]/40 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(99,245,255,0.12)]"
+                data-testid={`doc-card-${index}`}
+              >
                 <div>
-                  <h2 className="font-bold text-md text-primary">{card.title}</h2>
-                  <p className="text-xs text-secondary mt-1 leading-relaxed">{card.desc}</p>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-brand font-semibold mt-auto pt-2">
-                  <span>Read documentation</span>
-                  <ArrowRight size={12} />
-                </div>
-              </CardBody>
-            </Card>
-          </Link>
-        ))}
-      </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-lg bg-[rgba(99,245,255,0.08)] border border-[rgba(99,245,255,0.2)] flex items-center justify-center">
+                      {card.icon}
+                    </div>
+                    {card.badge && (
+                      <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[rgba(255,93,177,0.12)] border border-[rgba(255,93,177,0.4)] text-[#ff5db1]">
+                        {card.badge}
+                      </span>
+                    )}
+                  </div>
 
-      <div className="p-5 bg-surface-0 border border-subtle rounded-xl flex flex-col gap-3">
-        <h3 className="font-bold text-sm text-primary flex items-center gap-2">
-          <CheckCircle2 size={16} className="text-success" />
-          <span>Automated Synchronization Guarantee</span>
-        </h3>
-        <p className="text-xs text-secondary leading-relaxed">
-          All documentation on this portal is verified against repository pull requests, unit tests, and maintainer reviews.
-          Documentation is only published after all 7 deployment checks pass.
-        </p>
+                  <h3 className="font-bold text-lg text-[#eef6ff] mb-2">{card.title}</h3>
+                  <p className="text-xs text-[#8192ab] leading-relaxed mb-6">{card.desc}</p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-[#63f5ff] font-semibold mt-auto pt-3 border-t border-[rgba(143,185,220,0.1)]">
+                  <span>Read documentation</span>
+                  <ArrowRight size={13} />
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Centered Terminal Block */}
+          <div className="terminal panel-inner">
+            <div className="terminal-header">
+              <span className="terminal-dot red" />
+              <span className="terminal-dot yellow" />
+              <span className="terminal-dot green" />
+            </div>
+
+            <p>
+              <span className="green-text">thally@control-plane</span>
+              :~$ trace --change <b>a3f8c2d</b>
+              <br />
+              <span className="muted-text">→ mapping repository signals...</span>{' '}
+              <span className="green-text">done</span>
+              <br />
+              <span className="muted-text">
+                → 14 evidence sources connected · 10 knowledge areas classified
+              </span>
+              <br />
+              <span className="pink-text">→ 6 documentation pages published · 100% verified</span>
+              <span className="cursor">▋</span>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
