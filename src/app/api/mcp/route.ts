@@ -1,0 +1,130 @@
+import { NextResponse } from 'next/server'
+
+// Model Context Protocol (MCP) manifest
+// Advertises Thally documentation as a searchable resource for AI agents
+export async function GET() {
+  const manifest = {
+    schema_version: '2025-03-26',
+    name: 'thally-docs',
+    description: 'Thally documentation knowledge base — AI-agent accessible resource for documentation synchronization, API reference, and developer guides.',
+    version: '1.1.0',
+    contact: {
+      name: 'Thally',
+      url: 'https://thally.dev',
+      email: 'docs@thally.dev',
+    },
+    capabilities: {
+      search: true,
+      resources: true,
+      tools: false,
+      prompts: false,
+    },
+    resources: [
+      {
+        uri: 'thally-docs://getting-started',
+        name: 'Getting Started',
+        description: 'Quickstart guide — connect a repository and start using Thally.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/getting-started',
+        htmlUrl: 'https://thally.dev/docs/getting-started',
+        markdownUrl: 'https://thally.dev/api/docs/getting-started?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/getting-started/jsonld',
+      },
+      {
+        uri: 'thally-docs://smart-sync',
+        name: 'Smart Sync',
+        description: 'Automated documentation synchronization based on repository changes.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/smart-sync',
+        htmlUrl: 'https://thally.dev/docs/smart-sync',
+        markdownUrl: 'https://thally.dev/api/docs/smart-sync?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/smart-sync/jsonld',
+      },
+      {
+        uri: 'thally-docs://project-settings',
+        name: 'Project Settings',
+        description: 'Configure repository webhooks, sync frequency, and team assignments.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/project-settings',
+        htmlUrl: 'https://thally.dev/docs/project-settings',
+        markdownUrl: 'https://thally.dev/api/docs/project-settings?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/project-settings/jsonld',
+      },
+      {
+        uri: 'thally-docs://permissions',
+        name: 'Permissions & Scopes',
+        description: 'Role-based access control and scope requirements for Thally.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/permissions',
+        htmlUrl: 'https://thally.dev/docs/permissions',
+        markdownUrl: 'https://thally.dev/api/docs/permissions?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/permissions/jsonld',
+      },
+      {
+        uri: 'thally-docs://api-reference',
+        name: 'API Reference',
+        description: 'REST API documentation, authentication, sync endpoints, and rate limits.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/api-reference',
+        htmlUrl: 'https://thally.dev/docs/api-reference',
+        markdownUrl: 'https://thally.dev/api/docs/api-reference?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/api-reference/jsonld',
+      },
+      {
+        uri: 'thally-docs://troubleshooting',
+        name: 'Troubleshooting',
+        description: 'Diagnostic steps for common repository connection and sync failures.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/troubleshooting',
+        htmlUrl: 'https://thally.dev/docs/troubleshooting',
+        markdownUrl: 'https://thally.dev/api/docs/troubleshooting?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/troubleshooting/jsonld',
+      },
+      {
+        uri: 'thally-docs://faq',
+        name: 'FAQ',
+        description: 'Frequently asked questions about Thally.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/faq',
+        htmlUrl: 'https://thally.dev/docs/faq',
+        markdownUrl: 'https://thally.dev/api/docs/faq?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/faq/jsonld',
+      },
+      {
+        uri: 'thally-docs://changelog',
+        name: 'Changelog',
+        description: 'Release notes and history including Smart Sync v1.1.0.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/changelog',
+        htmlUrl: 'https://thally.dev/docs/changelog',
+        markdownUrl: 'https://thally.dev/api/docs/changelog?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/changelog/jsonld',
+      },
+      {
+        uri: 'thally-docs://agent-readiness',
+        name: 'Agent Readiness Report',
+        description: 'Formal audit of Thally documentation for AI agent accessibility across HTML, JSON, JSON-LD, Sitemap, and MCP surfaces.',
+        mimeType: 'application/json',
+        href: 'https://thally.dev/api/docs/agent-readiness',
+        htmlUrl: 'https://thally.dev/docs/agent-readiness',
+        markdownUrl: 'https://thally.dev/api/docs/agent-readiness?format=markdown',
+        jsonLdUrl: 'https://thally.dev/api/docs/agent-readiness/jsonld',
+      },
+    ],
+    search: {
+      endpoint: 'https://thally.dev/api/docs',
+      description: 'List all available documentation resources',
+    },
+    sitemap: 'https://thally.dev/sitemap.xml',
+    robots: 'https://thally.dev/robots.txt',
+  }
+
+  return NextResponse.json(manifest, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=86400',
+      'X-Thally-Surface': 'mcp',
+    },
+  })
+}

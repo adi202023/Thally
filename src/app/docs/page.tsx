@@ -34,6 +34,13 @@ export default function DocsHomePage() {
       badge: 'Quickstart',
     },
     {
+      title: 'Agent Readiness Report',
+      slug: 'agent-readiness',
+      desc: 'Audit of documentation accessibility across HTML, Markdown, JSON, JSON-LD, Sitemap, and MCP surfaces.',
+      icon: <Zap size={20} className="text-[#7dffbd]" />,
+      badge: 'Agent Ready',
+    },
+    {
       title: 'Project Settings',
       slug: 'project-settings',
       desc: 'Configure repository webhooks, analysis sensitivity, and team assignments.',
@@ -52,11 +59,23 @@ export default function DocsHomePage() {
       icon: <Code2 size={20} className="text-[#7dffbd]" />,
     },
     {
+      title: 'Troubleshooting Guide',
+      slug: 'troubleshooting',
+      desc: 'Diagnostic procedures for repository integration, webhook issues, and sync rate limits.',
+      icon: <Sliders size={20} className="text-[#ff5db1]" />,
+    },
+    {
       title: 'Changelog',
       slug: 'changelog',
       desc: 'Release notes and history, including Smart Sync v1.1.0 updates.',
       icon: <History size={20} className="text-[#63f5ff]" />,
       badge: 'v1.1.0 Live',
+    },
+    {
+      title: 'Frequently Asked Questions',
+      slug: 'faq',
+      desc: 'Answers to common questions regarding automated publishing and human-in-the-loop review.',
+      icon: <BookOpen size={20} className="text-[#ffb86b]" />,
     },
   ];
 

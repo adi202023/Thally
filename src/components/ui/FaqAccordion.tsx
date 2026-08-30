@@ -52,82 +52,89 @@ export function FaqAccordion({
         </h3>
       )}
 
-      <ul className="w-full mx-auto list-none p-0 flex flex-col rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        {items.map((item, index) => {
-          const isActive = activeIndex === index;
-          return (
-            <li
-              key={index}
-              className={cn(
-                "w-full relative transition-all duration-300 ease-in",
-                "border-b border-border last:border-b-0",
-                isActive ? "border-b border-border" : ""
-              )}
-            >
-              <button
+      {items.length === 0 ? (
+        <div className="p-8 text-center rounded-xl border border-border bg-card text-muted-foreground">
+          <p className="text-sm font-semibold text-foreground m-0">No matching questions found</p>
+          <p className="text-xs mt-1 text-muted-foreground">Try adjusting your search query or select another topic</p>
+        </div>
+      ) : (
+        <ul className="w-full mx-auto list-none p-0 flex flex-col rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+          {items.map((item, index) => {
+            const isActive = activeIndex === index;
+            return (
+              <li
+                key={index}
                 className={cn(
-                  "flex flex-row items-center justify-start w-full min-h-[56px] py-4 relative m-0 px-4 pl-12 sm:pl-14 cursor-pointer",
-                  "border-l-[6px] md:border-l-[8px] transition-colors duration-200 text-left outline-none text-sm md:text-base border-none",
-                  isActive
-                    ? "border-l-foreground dark:border-l-white bg-muted/60 dark:bg-white/10 text-foreground font-semibold"
-                    : "border-l-border dark:border-l-white/20 bg-transparent text-muted-foreground hover:border-l-foreground/60 dark:hover:border-l-white/60 hover:text-foreground hover:bg-muted/40 dark:hover:bg-white/5"
+                  "w-full relative transition-all duration-300 ease-in",
+                  "border-b border-border last:border-b-0",
+                  isActive ? "border-b border-border" : ""
                 )}
-                style={{
-                  borderLeftStyle: 'solid',
-                  borderLeftWidth: '6px',
-                  borderLeftColor: isActive ? 'currentColor' : undefined,
-                }}
-                onClick={() => toggleItem(index)}
-                aria-expanded={isActive}
               >
-                {/* Plus/Minus Icon */}
-                <span
+                <button
                   className={cn(
-                    "absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 transition-all duration-200 leading-none select-none",
+                    "flex flex-row items-center justify-start w-full min-h-[56px] py-4 relative m-0 px-4 pl-12 sm:pl-14 cursor-pointer",
+                    "border-l-[6px] md:border-l-[8px] transition-colors duration-200 text-left outline-none text-sm md:text-base border-none",
                     isActive
-                      ? "text-[26px] sm:text-[32px] font-normal text-foreground"
-                      : "text-[20px] sm:text-[24px] font-normal text-muted-foreground"
+                      ? "border-l-foreground dark:border-l-white bg-muted/60 dark:bg-white/10 text-foreground font-semibold"
+                      : "border-l-border dark:border-l-white/20 bg-transparent text-muted-foreground hover:border-l-foreground/60 dark:hover:border-l-white/60 hover:text-foreground hover:bg-muted/40 dark:hover:bg-white/5"
                   )}
+                  style={{
+                    borderLeftStyle: 'solid',
+                    borderLeftWidth: '6px',
+                    borderLeftColor: isActive ? 'currentColor' : undefined,
+                  }}
+                  onClick={() => toggleItem(index)}
+                  aria-expanded={isActive}
                 >
-                  {isActive ? "−" : "+"}
-                </span>
+                  {/* Plus/Minus Icon */}
+                  <span
+                    className={cn(
+                      "absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 transition-all duration-200 leading-none select-none",
+                      isActive
+                        ? "text-[26px] sm:text-[32px] font-normal text-foreground"
+                        : "text-[20px] sm:text-[24px] font-normal text-muted-foreground"
+                    )}
+                  >
+                    {isActive ? "−" : "+"}
+                  </span>
 
-                <span className="pr-8 font-medium text-foreground">{item.question}</span>
+                  <span className="pr-8 font-medium text-foreground">{item.question}</span>
 
-                {/* Chevron */}
-                <span
+                  {/* Chevron */}
+                  <span
+                    className={cn(
+                      "absolute right-5 block w-2 h-2 border-t-[2.5px] border-r-[2.5px] transition-transform duration-200 ease-in-out",
+                      isActive
+                        ? "rotate-[-44deg] border-foreground"
+                        : "rotate-[133deg] border-muted-foreground"
+                    )}
+                  />
+                </button>
+
+                <div
                   className={cn(
-                    "absolute right-5 block w-2 h-2 border-t-[2.5px] border-r-[2.5px] transition-transform duration-200 ease-in-out",
+                    "grid transition-all duration-300 ease-in-out w-full",
                     isActive
-                      ? "rotate-[-44deg] border-foreground"
-                      : "rotate-[133deg] border-muted-foreground"
+                      ? "grid-rows-[1fr] bg-muted/60 dark:bg-white/10 border-l-[6px]"
+                      : "grid-rows-[0fr] bg-transparent border-l-[6px] border-l-transparent"
                   )}
-                />
-              </button>
-
-              <div
-                className={cn(
-                  "grid transition-all duration-300 ease-in-out w-full",
-                  isActive
-                    ? "grid-rows-[1fr] bg-muted/60 dark:bg-white/10 border-l-[6px]"
-                    : "grid-rows-[0fr] bg-transparent border-l-[6px] border-l-transparent"
-                )}
-                style={{
-                  borderLeftStyle: 'solid',
-                  borderLeftWidth: '6px',
-                  borderLeftColor: isActive ? 'currentColor' : 'transparent',
-                }}
-              >
-                <div className="overflow-hidden">
-                  <div className="flex flex-row items-start justify-start w-full px-4 pl-12 sm:pl-14 pb-5 pt-1 text-xs sm:text-sm font-normal text-muted-foreground leading-relaxed">
-                    <span className="opacity-95 text-foreground/90">{item.answer}</span>
+                  style={{
+                    borderLeftStyle: 'solid',
+                    borderLeftWidth: '6px',
+                    borderLeftColor: isActive ? 'currentColor' : 'transparent',
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="flex flex-row items-start justify-start w-full px-4 pl-12 sm:pl-14 pb-5 pt-1 text-xs sm:text-sm font-normal text-muted-foreground leading-relaxed">
+                      <span className="opacity-95 text-foreground/90">{item.answer}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

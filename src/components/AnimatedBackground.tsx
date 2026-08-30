@@ -1,12 +1,15 @@
 "use client"
 
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 type Theme = "dark" | "light"
+type Variant = "dashboard" | "landing"
 
 interface AnimatedBackgroundProps {
   /** Adjusts particle/line color + opacity to sit over dark or light surfaces. */
   theme?: Theme
+  /** Controls intensity: dashboard is subtle & calm; landing is balanced & refined. */
+  variant?: Variant
   /** Used ONLY for the traveling pulse of light. Everything else stays neutral. */
   accentColor?: string
   /** Optional className passthrough for the fixed container. */
@@ -19,6 +22,7 @@ interface Particle {
   vx: number
   vy: number
   r: number
+  originR: number
 }
 
 interface Pulse {
@@ -30,21 +34,54 @@ interface Pulse {
 }
 
 /**
- * A subtle, performant knowledge-graph background.
- *
- * - Fixed, full-viewport, behind all content, pointer-events: none.
- * - Neutral white/grey particles + connection lines (never purple/blue).
- * - Occasional accent-colored pulse travels along a connection line.
- * - Canvas + requestAnimationFrame, pauses when tab hidden.
- * - Fewer particles + no lines on small screens.
- * - Respects prefers-reduced-motion (renders a static field).
+ * A reactive, non-clingy knowledge-graph background.
+ * Automatically updates on theme toggle without page reload.
  */
 export function AnimatedBackground({
-  theme = "dark",
+  theme,
+  variant = "dashboard",
   accentColor = "#F5A623",
   className,
 }: AnimatedBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [activeTheme, setActiveTheme] = useState<Theme>(() => {
+    if (theme) return theme
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light"
+    }
+    return "dark"
+  })
+
+  // Keep activeTheme in sync with explicit prop
+  useEffect(() => {
+    if (theme) setActiveTheme(theme)
+  }, [theme])
+
+  // Instant real-time MutationObserver on <html> class list to switch theme without refresh
+  useEffect(() => {
+    const updateThemeFromDOM = () => {
+      const isDark = document.documentElement.classList.contains("dark")
+      setActiveTheme(isDark ? "dark" : "light")
+    }
+
+    updateThemeFromDOM()
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "class") {
+          updateThemeFromDOM()
+        }
+      }
+    })
+
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
+    window.addEventListener("theme-change", updateThemeFromDOM)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("theme-change", updateThemeFromDOM)
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -59,12 +96,18 @@ export function AnimatedBackground({
       "(prefers-reduced-motion: reduce)",
     ).matches
 
-    // Neutral palette only. Dark theme -> soft white; light theme -> dark grey.
-    const isDark = theme === "dark"
-    const baseRGB = isDark ? "255, 255, 255" : "40, 40, 45"
-    const particleOpacity = isDark ? 0.16 : 0.1
-    const lineOpacityMax = isDark ? 0.14 : 0.09
-    const accent = accentColor
+    const isDark = activeTheme === "dark"
+    const isLanding = variant === "landing"
+
+    // Dashboard: exact original intensity. Landing: refined, non-clingy subtle intensity.
+    const baseRGB = isDark ? "255, 255, 255" : isLanding ? "30, 41, 59" : "40, 40, 45"
+    const particleOpacity = isDark
+      ? (isLanding ? 0.18 : 0.16)
+      : (isLanding ? 0.22 : 0.12)
+    const lineOpacityMax = isDark
+      ? (isLanding ? 0.15 : 0.14)
+      : (isLanding ? 0.18 : 0.10)
+    const accent = isDark ? accentColor : "#D97706"
 
     let width = 0
     let height = 0
@@ -76,23 +119,31 @@ export function AnimatedBackground({
     let lastPulseAt = 0
     let running = true
 
-    const connectDistance = () => (isMobile ? 0 : 130)
+    let mouseX = -9999
+    let mouseY = -9999
+
+    const connectDistance = () => (isMobile ? 0 : isLanding ? 135 : 130)
+    // Non-clingy subtle cursor range on landing only
+    const mouseConnectDistance = isLanding ? 120 : 0
 
     function seedParticles() {
       isMobile = width < 768
       const area = width * height
-      // ~1 particle per ~12k px^2, clamped, halved on mobile.
-      let count = Math.round(area / 12000)
-      count = Math.max(40, Math.min(150, count))
+      let count = Math.round(area / (isLanding ? 12000 : 12000))
+      count = Math.max(40, Math.min(140, count))
       if (isMobile) count = Math.round(count / 2)
 
-      particles = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        r: Math.random() * 1.4 + 0.8,
-      }))
+      particles = Array.from({ length: count }, () => {
+        const r = Math.random() * 1.3 + 0.9
+        return {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: (Math.random() - 0.5) * 0.25,
+          r,
+          originR: r,
+        }
+      })
       pulses = []
     }
 
@@ -129,10 +180,31 @@ export function AnimatedBackground({
           if (distSq < maxSq) {
             const alpha = (1 - distSq / maxSq) * lineOpacityMax
             currentCtx.strokeStyle = `rgba(${baseRGB}, ${alpha})`
-            currentCtx.lineWidth = 0.6
+            currentCtx.lineWidth = isDark ? 0.6 : 0.7
             currentCtx.beginPath()
             currentCtx.moveTo(a.x, a.y)
             currentCtx.lineTo(b.x, b.y)
+            currentCtx.stroke()
+          }
+        }
+      }
+
+      // Subtle, non-clingy cursor connection on landing only
+      if (mouseConnectDistance > 0 && mouseX > 0 && mouseY > 0 && !isMobile) {
+        const mouseSq = mouseConnectDistance * mouseConnectDistance
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i]
+          const dx = p.x - mouseX
+          const dy = p.y - mouseY
+          const distSq = dx * dx + dy * dy
+          if (distSq < mouseSq) {
+            const ratio = 1 - distSq / mouseSq
+            const alpha = ratio * (isDark ? 0.28 : 0.32)
+            currentCtx.strokeStyle = `rgba(${baseRGB}, ${alpha})`
+            currentCtx.lineWidth = 0.75
+            currentCtx.beginPath()
+            currentCtx.moveTo(p.x, p.y)
+            currentCtx.lineTo(mouseX, mouseY)
             currentCtx.stroke()
           }
         }
@@ -141,11 +213,10 @@ export function AnimatedBackground({
 
     function maybeSpawnPulse(now: number) {
       if (isMobile) return
-      if (now - lastPulseAt < 2600) return
-      if (Math.random() > 0.5) return
+      if (now - lastPulseAt < 2400) return
+      if (Math.random() > 0.45) return
       const max = connectDistance()
       const maxSq = max * max
-      // Find a random pair of nearby particles.
       const candidates: Array<[number, number]> = []
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -158,7 +229,7 @@ export function AnimatedBackground({
       }
       if (candidates.length === 0) return
       const [a, b] = candidates[Math.floor(Math.random() * candidates.length)]
-      pulses.push({ a, b, t: 0, speed: 0.012 + Math.random() * 0.01, life: 1 })
+      pulses.push({ a, b, t: 0, speed: 0.013 + Math.random() * 0.01, life: 1 })
       lastPulseAt = now
     }
 
@@ -172,7 +243,6 @@ export function AnimatedBackground({
           continue
         }
         pulse.t += pulse.speed
-        // Fade in on the first 15%, fade out on the last 25%.
         if (pulse.t >= 1) {
           pulses.splice(k, 1)
           continue
@@ -186,7 +256,7 @@ export function AnimatedBackground({
         const x = a.x + (b.x - a.x) * pulse.t
         const y = a.y + (b.y - a.y) * pulse.t
 
-        // Glow.
+        // Glow
         const grad = currentCtx.createRadialGradient(x, y, 0, x, y, 6)
         grad.addColorStop(0, hexToRgba(accent, 0.9 * fade))
         grad.addColorStop(1, hexToRgba(accent, 0))
@@ -195,7 +265,7 @@ export function AnimatedBackground({
         currentCtx.arc(x, y, 6, 0, Math.PI * 2)
         currentCtx.fill()
 
-        // Core dot.
+        // Core dot
         currentCtx.fillStyle = hexToRgba(accent, fade)
         currentCtx.beginPath()
         currentCtx.arc(x, y, 1.6, 0, Math.PI * 2)
@@ -239,6 +309,16 @@ export function AnimatedBackground({
       }
     }
 
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX
+      mouseY = e.clientY
+    }
+
+    const handleMouseLeave = () => {
+      mouseX = -9999
+      mouseY = -9999
+    }
+
     resize()
 
     if (prefersReducedMotion) {
@@ -253,14 +333,18 @@ export function AnimatedBackground({
     }
 
     window.addEventListener("resize", onResize)
+    window.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseleave", handleMouseLeave)
     document.addEventListener("visibilitychange", handleVisibility)
 
     return () => {
       cancelAnimationFrame(rafId)
       window.removeEventListener("resize", onResize)
+      window.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseleave", handleMouseLeave)
       document.removeEventListener("visibilitychange", handleVisibility)
     }
-  }, [theme, accentColor])
+  }, [activeTheme, variant, accentColor])
 
   return (
     <canvas
@@ -279,7 +363,6 @@ export function AnimatedBackground({
   )
 }
 
-/** Convert #RRGGBB (or #RGB) to an rgba() string with the given alpha. */
 function hexToRgba(hex: string, alpha: number): string {
   let h = hex.replace("#", "")
   if (h.length === 3) {

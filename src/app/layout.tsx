@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'Thally - Ethereal Forge | Intelligent Documentation Engine',
   description:
     'Visualizing the flow from raw code changes to synthesized knowledge. Thally agents are actively monitoring your ecosystem.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

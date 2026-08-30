@@ -44,6 +44,8 @@
 body {
   font-family: 'Geist', system-ui, -apple-system, sans-serif;
   background-color: var(--background);
+  background-image: radial-gradient(rgba(100, 116, 139, 0.14) 1px, transparent 1px);
+  background-size: 28px 28px;
   color: var(--foreground);
   margin: 0;
   padding: 0;
@@ -53,6 +55,8 @@ body {
 
 .dark body {
   background-color: #090a0f;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
   color: #f4f4f6;
 }
 

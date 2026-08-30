@@ -31,13 +31,35 @@ const TICKETS = [
   { id: '1039', title: 'API schema mismatch', status: 'RESOLVED', statusClass: 'green' },
 ];
 
+const TOPIC_TAGS = [
+  'All',
+  'Smart Sync',
+  'Repositories',
+  'Review Gate',
+  'Sync Frequency',
+  'Permissions',
+];
+
 export default function SupportPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState('All');
 
-  const filteredFaqs = search.trim()
-    ? FAQ_ITEMS.filter((f) => f.question.toLowerCase().includes(search.toLowerCase()) || String(f.answer).toLowerCase().includes(search.toLowerCase()))
-    : FAQ_ITEMS;
+  const filteredFaqs = FAQ_ITEMS.filter((f) => {
+    const matchesSearch = !search.trim() ||
+      f.question.toLowerCase().includes(search.toLowerCase()) ||
+      String(f.answer).toLowerCase().includes(search.toLowerCase());
+    const matchesTopic = selectedTopic === 'All' ||
+      f.question.toLowerCase().includes(selectedTopic.toLowerCase()) ||
+      String(f.answer).toLowerCase().includes(selectedTopic.toLowerCase());
+    return matchesSearch && matchesTopic;
+  });
+
+  const filteredTickets = TICKETS.filter((t) =>
+    !search.trim() ||
+    t.title.toLowerCase().includes(search.toLowerCase()) ||
+    t.id.includes(search)
+  );
 
   return (
     <>
@@ -54,20 +76,53 @@ export default function SupportPage() {
         <div className="panel p-3">
           <div className="relative flex items-center">
             <span
-              className="material-symbols-outlined absolute left-3 text-text-secondary dark:text-outline-variant pointer-events-none select-none"
-              style={{ fontSize: '18px' }}
+              className="material-symbols-outlined absolute left-3 text-muted-foreground pointer-events-none select-none text-[20px]"
+              style={{ fontVariationSettings: "'FILL' 0" }}
             >
               search
             </span>
             <input
               type="text"
-              placeholder="Search help articles..."
+              placeholder="Search help articles, questions, or tickets..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               data-testid="support-search"
-              className="w-full pl-10 pr-4 py-2 bg-transparent border-none outline-none text-sm text-text-primary dark:text-inverse-on-surface placeholder:text-text-secondary dark:placeholder:text-outline-variant font-body-md"
+              className="w-full pl-10 pr-20 py-2 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground font-sans"
             />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground bg-muted rounded border border-border cursor-pointer transition-colors"
+              >
+                Clear
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Quick Topic Chips */}
+        <div className="flex gap-2 flex-wrap items-center">
+          <span className="text-xs font-mono text-muted-foreground mr-1">Topics:</span>
+          {TOPIC_TAGS.map((tag) => {
+            const isSelected = selectedTopic === tag && !search;
+            return (
+              <button
+                key={tag}
+                onClick={() => {
+                  setSelectedTopic(tag);
+                  if (tag !== 'All') setSearch(tag);
+                  else setSearch('');
+                }}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                  isSelected || search.toLowerCase() === tag.toLowerCase()
+                    ? 'bg-foreground text-background border-foreground font-semibold'
+                    : 'bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80'
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
         </div>
 
         {/* Contact cards */}
@@ -78,8 +133,8 @@ export default function SupportPage() {
             </div>
             <div>
               <span className="eyebrow">EMAIL</span>
-              <h2 className="text-base font-bold text-text-primary dark:text-inverse-on-surface my-1">Email Support</h2>
-              <p className="text-sm text-text-secondary dark:text-outline-variant">support@thally.io — response within 24h</p>
+              <h2 className="text-base font-bold text-foreground my-1">Email Support</h2>
+              <p className="text-sm text-muted-foreground">support@thally.io — response within 24h</p>
             </div>
           </div>
 
@@ -89,8 +144,8 @@ export default function SupportPage() {
             </div>
             <div>
               <span className="eyebrow">LIVE CHAT</span>
-              <h2 className="text-base font-bold text-text-primary dark:text-inverse-on-surface my-1">Live Chat</h2>
-              <p className="text-sm text-text-secondary dark:text-outline-variant">Chat with our team — avg response 5 min</p>
+              <h2 className="text-base font-bold text-foreground my-1">Live Chat</h2>
+              <p className="text-sm text-muted-foreground">Chat with our team — avg response 5 min</p>
             </div>
           </div>
         </div>
@@ -100,20 +155,26 @@ export default function SupportPage() {
 
         {/* Open tickets */}
         <div>
-          <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-text-secondary dark:text-outline-variant mb-3">
+          <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-muted-foreground mb-3">
             Open Tickets
           </h3>
           <div className="panel workspace-grid">
-            {TICKETS.map((t, i) => (
-              <div className="workspace-row" key={t.id} data-testid={`ticket-row-${i}`}>
-                <span className="row-index">#{t.id}</span>
-                <div>
-                  <b className="text-text-primary dark:text-inverse-on-surface">{t.title}</b>
-                  <small className="text-text-secondary dark:text-outline-variant">Ticket #{t.id}</small>
-                </div>
-                <span className={`row-state ${t.statusClass}`}>{t.status}</span>
+            {filteredTickets.length === 0 ? (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                No tickets matching &ldquo;{search}&rdquo;
               </div>
-            ))}
+            ) : (
+              filteredTickets.map((t, i) => (
+                <div className="workspace-row" key={t.id} data-testid={`ticket-row-${i}`}>
+                  <span className="row-index">#{t.id}</span>
+                  <div>
+                    <b className="text-foreground">{t.title}</b>
+                    <small className="text-muted-foreground">Ticket #{t.id}</small>
+                  </div>
+                  <span className={`row-state ${t.statusClass}`}>{t.status}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

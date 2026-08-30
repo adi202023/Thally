@@ -301,6 +301,7 @@ If Smart Sync is not firing automatically:
       { id: 'v1-0-0', title: 'v1.0.0 — Initial Release', level: 2 },
     ],
     prev: { title: 'FAQ', slug: 'faq' },
+    next: { title: 'Agent Readiness', slug: 'agent-readiness' },
     content: `# Changelog
 
 ## v1.1.0 — Smart Sync Release {#v1-1-0}
@@ -318,6 +319,60 @@ If Smart Sync is not firing automatically:
 
 - Core documentation portal and repository change detection.`,
   },
+  'agent-readiness': {
+    title: 'Agent Readiness Report',
+    version: '1.1.0',
+    publishedCommit: 'b4c9e1f',
+    updatedAt: '2026-08-31',
+    toc: [
+      { id: 'overview', title: 'Overview', level: 2 },
+      { id: 'surface-audit', title: 'Surface Audit', level: 2 },
+      { id: 'improvements', title: 'Applied Improvements', level: 2 },
+      { id: 'verification', title: 'Verified Guide', level: 2 },
+    ],
+    prev: { title: 'Changelog', slug: 'changelog' },
+    content: `# Agent Readiness Report
+
+This page formally audits the Thally documentation site for AI agent and crawler accessibility across all surfaces.
+
+## Overview {#overview}
+
+Thally documentation is designed to be fully machine-readable and AI-agent accessible. Every guide is available in HTML, JSON, Markdown, and JSON-LD structured data, with a Model Context Protocol (MCP) manifest at \`/api/mcp\`.
+
+## Surface Audit {#surface-audit}
+
+| Surface | Status | URL |
+|---|---|---|
+| HTML | Available | /docs/smart-sync |
+| Markdown | Available | /api/docs/smart-sync?format=markdown |
+| JSON | Available | /api/docs/smart-sync |
+| JSON-LD | Available | /api/docs/smart-sync/jsonld |
+| Sitemap | Available | /sitemap.xml |
+| robots.txt | Available | /robots.txt |
+| Agent Index | Declared | via robots.txt AI rules |
+| MCP | Available | /api/mcp |
+
+## Applied Improvements {#improvements}
+
+1. **AI Agent robots.txt rules** — Explicit allow rules for GPTBot, ClaudeBot, anthropic-ai user agents targeting /docs/ and /api/mcp.
+2. **MCP manifest** at /api/mcp — Lists all 9 documentation resources with JSON, Markdown, and JSON-LD URLs per resource.
+3. **JSON content API** at /api/docs/[slug] — Returns structured doc content with metadata, TOC, prev/next navigation.
+4. **Markdown export** at /api/docs/[slug]?format=markdown — Returns raw markdown content with correct MIME type.
+5. **JSON-LD TechArticle schema** at /api/docs/[slug]/jsonld — schema.org structured data for semantic agent indexing.
+6. **Sitemap.xml** — Auto-generated via Next.js sitemap.ts covering all doc pages and public routes.
+
+## Verified Guide: Smart Sync {#verification}
+
+The Smart Sync guide has been verified across all 7 surfaces:
+
+- **HTML**: /docs/smart-sync — full rendered page with sticky TOC and prev/next navigation
+- **JSON**: /api/docs/smart-sync — structured JSON with title, version, content, TOC
+- **Markdown**: /api/docs/smart-sync?format=markdown — raw .md content with correct Content-Type
+- **JSON-LD**: /api/docs/smart-sync/jsonld — schema.org TechArticle with author, publisher, sameAs links
+- **Sitemap**: /sitemap.xml includes https://thally.dev/docs/smart-sync at priority 0.8
+- **robots.txt**: /docs/ path explicitly allowed for *, GPTBot, ClaudeBot, anthropic-ai
+- **MCP**: /api/mcp lists smart-sync resource with all surface URLs`,
+  },
 };
 
 export default function DocPage() {
@@ -325,8 +380,24 @@ export default function DocPage() {
   const slug = (params?.slug as string) || 'getting-started';
   const doc = DOCS_DATA[slug] || DOCS_DATA['getting-started'];
 
+  // Build JSON-LD for this page
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    name: doc.title,
+    headline: doc.title,
+    url: `https://thally.dev/docs/${slug}`,
+    dateModified: doc.updatedAt,
+    author: { '@type': 'Organization', name: 'Thally', url: 'https://thally.dev' },
+    publisher: { '@type': 'Organization', name: 'Thally', url: 'https://thally.dev' },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header
         eyebrow={`docs / ${slug}`}
         title={doc.title}

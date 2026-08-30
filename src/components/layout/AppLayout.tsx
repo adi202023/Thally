@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { ThallyLogo } from '@/components/ui/ThallyLogo';
 
 // Shared hook: close a panel when clicking outside its ref
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
@@ -32,12 +33,13 @@ function useToast() {
 
 // Search resources list with categories and descriptions
 const SEARCH_RESOURCES = [
-  { label: 'Dashboard', category: 'Pages', desc: 'Main control plane, synthesis pipeline, and metrics', href: '/', icon: 'dashboard' },
+  { label: 'Dashboard', category: 'Pages', desc: 'Main control plane, synthesis pipeline, and metrics', href: '/dashboard', icon: 'dashboard' },
   { label: 'Impact Radar', category: 'Pages', desc: 'Topological service dependency graph and risk analysis', href: '/impact', icon: 'radar' },
   { label: 'Deployments', category: 'Pages', desc: 'Active documentation staging & preview environments', href: '/preview', icon: 'rocket_launch' },
   { label: 'Infrastructure', category: 'Pages', desc: 'Compute & storage cluster telemetry and node status', href: '/changes', icon: 'developer_board' },
   { label: 'Security & Verification', category: 'Pages', desc: 'Security protocols, compliance, and policy checks', href: '/verification', icon: 'shield_with_heart' },
   { label: 'Documentation Portal', category: 'Documentation', desc: 'Knowledge areas, specs, and product guides', href: '/docs', icon: 'menu_book' },
+  { label: 'Agent Readiness Report', category: 'Documentation', desc: 'Full surface audit: HTML, Markdown, JSON, JSON-LD, Sitemap & MCP', href: '/docs/agent-readiness', icon: 'verified' },
   { label: 'Smart Sync Guide', category: 'Documentation', desc: 'Connected repo sync setup and workflow guide', href: '/docs/smart-sync', icon: 'sync' },
   { label: 'Permissions & Scopes', category: 'Documentation', desc: 'RBAC scopes, access levels, and role definitions', href: '/docs/permissions', icon: 'key' },
   { label: 'Agent Knowledge', category: 'AI Agent', desc: 'Ask natural language questions with verified provenance citations', href: '/agent', icon: 'smart_toy' },
@@ -106,11 +108,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('dark', next);
     document.documentElement.classList.toggle('light', !next);
     localStorage.theme = next ? 'dark' : 'light';
+    window.dispatchEvent(new Event('theme-change'));
     toast(next ? 'Dark mode enabled' : 'Light mode enabled', 'info');
   };
 
   const navItems = [
-    { label: 'Dashboard', href: '/', icon: 'dashboard' },
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { label: 'Impact Radar', href: '/impact', icon: 'radar' },
     { label: 'Deployments', href: '/preview', icon: 'rocket_launch' },
     { label: 'Infrastructure', href: '/changes', icon: 'developer_board' },
@@ -134,10 +137,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     setCmdQuery('');
   };
 
+  // Standalone layout for Landing Page (/ or /landing) and Login (/login)
+  if (pathname === '/' || pathname === '/landing' || pathname === '/login') {
+    return (
+      <div className="min-h-screen bg-background text-foreground font-body-md antialiased transition-colors duration-300 relative">
+        <AnimatedBackground variant="landing" />
+        <div className="relative z-10">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground font-body-md antialiased transition-colors duration-300 relative">
       {/* Animated Knowledge Graph Background */}
-      <AnimatedBackground theme={isDark ? 'dark' : 'light'} />
+      <AnimatedBackground variant="dashboard" />
 
       {/* ── TOAST NOTIFICATIONS ─────────────────────────────────────── */}
       <div className="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
@@ -280,18 +295,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Brand + tabs */}
           <div className="flex items-center gap-6">
             <Link
-              href="/"
+              href="/dashboard"
               className="text-xl font-bold tracking-tight text-foreground no-underline hover:opacity-80 transition-opacity"
             >
               Thally
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
               {[
-                { label: 'Workflow', href: '/' },
+                { label: 'Workflow', href: '/dashboard' },
                 { label: 'Audit', href: '/audit' },
                 { label: 'Agents', href: '/agent' },
               ].map((item) => {
-                const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                const isActive = item.href === '/dashboard' ? pathname.startsWith('/dashboard') : pathname.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -521,9 +536,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <aside className="hidden md:flex flex-col flex-shrink-0 w-20 hover:w-64 transition-all duration-300 border-r border-border bg-background/80 backdrop-blur-md group overflow-x-hidden overflow-y-hidden no-scrollbar sticky top-16 h-[calc(100vh-4rem)] z-40 select-none">
           {/* Brand header */}
           <div className="px-5 py-5 flex items-center gap-3.5 whitespace-nowrap border-b border-border">
-            <div className="grid size-9 place-items-center rounded-xl border border-border bg-card text-xs font-bold text-foreground flex-shrink-0">
-              T
-            </div>
+            <ThallyLogo size={32} />
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="font-bold text-foreground text-sm leading-tight">
                 Thally
@@ -538,8 +551,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden no-scrollbar">
             {navItems.map((item) => {
               const isActive =
-                item.href === '/'
-                  ? pathname === '/'
+                item.href === '/dashboard'
+                  ? pathname.startsWith('/dashboard')
                   : pathname.startsWith(item.href);
               return (
                 <Link
