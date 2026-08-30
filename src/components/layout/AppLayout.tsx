@@ -30,18 +30,21 @@ function useToast() {
   return { toasts, toast };
 }
 
-// Command palette
-const COMMANDS = [
-  { label: 'Dashboard', href: '/', icon: 'dashboard' },
-  { label: 'Impact Radar', href: '/impact', icon: 'radar' },
-  { label: 'Deployments', href: '/preview', icon: 'rocket_launch' },
-  { label: 'Infrastructure', href: '/changes', icon: 'developer_board' },
-  { label: 'Security', href: '/verification', icon: 'shield_with_heart' },
-  { label: 'Docs', href: '/docs', icon: 'menu_book' },
-  { label: 'Agent Knowledge', href: '/agent', icon: 'smart_toy' },
-  { label: 'Audit Trail', href: '/audit', icon: 'history' },
-  { label: 'Review', href: '/review', icon: 'rate_review' },
-  { label: 'Evidence', href: '/evidence', icon: 'search' },
+// Search resources list with categories and descriptions
+const SEARCH_RESOURCES = [
+  { label: 'Dashboard', category: 'Pages', desc: 'Main control plane, synthesis pipeline, and metrics', href: '/', icon: 'dashboard' },
+  { label: 'Impact Radar', category: 'Pages', desc: 'Topological service dependency graph and risk analysis', href: '/impact', icon: 'radar' },
+  { label: 'Deployments', category: 'Pages', desc: 'Active documentation staging & preview environments', href: '/preview', icon: 'rocket_launch' },
+  { label: 'Infrastructure', category: 'Pages', desc: 'Compute & storage cluster telemetry and node status', href: '/changes', icon: 'developer_board' },
+  { label: 'Security & Verification', category: 'Pages', desc: 'Security protocols, compliance, and policy checks', href: '/verification', icon: 'shield_with_heart' },
+  { label: 'Documentation Portal', category: 'Documentation', desc: 'Knowledge areas, specs, and product guides', href: '/docs', icon: 'menu_book' },
+  { label: 'Smart Sync Guide', category: 'Documentation', desc: 'Connected repo sync setup and workflow guide', href: '/docs/smart-sync', icon: 'sync' },
+  { label: 'Permissions & Scopes', category: 'Documentation', desc: 'RBAC scopes, access levels, and role definitions', href: '/docs/permissions', icon: 'key' },
+  { label: 'Agent Knowledge', category: 'AI Agent', desc: 'Ask natural language questions with verified provenance citations', href: '/agent', icon: 'smart_toy' },
+  { label: 'Audit Trail', category: 'Audit', desc: 'Historical change logs, telemetry, and version history', href: '/audit', icon: 'history' },
+  { label: 'Engineering Review', category: 'Actions', desc: 'Review pending documentation proposals before publishing', href: '/review', icon: 'rate_review' },
+  { label: 'Evidence Sources', category: 'Actions', desc: 'Inspect raw diffs and PR evidence detection', href: '/evidence', icon: 'search' },
+  { label: 'Support & FAQs', category: 'Help', desc: 'Get help from the team or browse frequently asked questions', href: '/support', icon: 'help' },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -50,7 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [cmdQuery, setCmdQuery] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const { toasts, toast } = useToast();
 
   // Dropdown state
@@ -64,6 +67,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const settingsRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useClickOutside(notifRef, () => setNotifOpen(false));
   useClickOutside(settingsRef, () => setSettingsOpen(false));
@@ -88,6 +92,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         setCmdOpen((v) => !v);
         setCmdQuery('');
+        setSelectedIndex(0);
       }
       if (e.key === 'Escape') setCmdOpen(false);
     };
@@ -117,9 +122,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { label: 'Support', href: '/support', icon: 'help' },
   ];
 
-  const filteredCmds = COMMANDS.filter((c) =>
-    c.label.toLowerCase().includes(cmdQuery.toLowerCase())
+  const filteredResources = SEARCH_RESOURCES.filter((c) =>
+    c.label.toLowerCase().includes(cmdQuery.toLowerCase()) ||
+    c.desc.toLowerCase().includes(cmdQuery.toLowerCase()) ||
+    c.category.toLowerCase().includes(cmdQuery.toLowerCase())
   );
+
+  const handleSelectResource = (href: string) => {
+    router.push(href);
+    setCmdOpen(false);
+    setCmdQuery('');
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-body-md antialiased transition-colors duration-300 relative">
@@ -144,65 +157,119 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         ))}
       </div>
 
-      {/* ── COMMAND PALETTE ─────────────────────────────────────────── */}
+      {/* ── SEARCH RESOURCES / COMMAND PALETTE MODAL ─────────────────── */}
       {cmdOpen && (
         <div
-          className="fixed inset-0 z-[90] flex items-start justify-center pt-24 px-4"
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 bg-black/70 backdrop-blur-md"
           onClick={() => setCmdOpen(false)}
         >
           <div
-            className="w-full max-w-lg glass-card rounded-xl overflow-hidden"
+            className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle dark:border-white/10">
+            {/* Search Input Bar */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
               <span
-                className="material-symbols-outlined text-outline dark:text-outline-variant"
+                className="material-symbols-outlined text-muted-foreground text-[22px]"
                 style={{ fontVariationSettings: "'FILL' 0" }}
               >
                 search
               </span>
               <input
+                ref={searchInputRef}
                 autoFocus
-                className="flex-1 bg-transparent outline-none text-body-sm text-text-primary dark:text-inverse-on-surface placeholder:text-text-secondary dark:placeholder:text-outline-variant"
-                placeholder="Search pages, actions..."
+                className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground font-sans"
+                placeholder="Search resources, documents, actions..."
                 value={cmdQuery}
-                onChange={(e) => setCmdQuery(e.target.value)}
+                onChange={(e) => {
+                  setCmdQuery(e.target.value);
+                  setSelectedIndex(0);
+                }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && filteredCmds[0]) {
-                    router.push(filteredCmds[0].href);
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setSelectedIndex((prev) => (prev + 1) % Math.max(1, filteredResources.length));
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setSelectedIndex((prev) => (prev - 1 + filteredResources.length) % Math.max(1, filteredResources.length));
+                  } else if (e.key === 'Enter' && filteredResources[selectedIndex]) {
+                    handleSelectResource(filteredResources[selectedIndex].href);
+                  } else if (e.key === 'Escape') {
                     setCmdOpen(false);
                   }
                 }}
               />
-              <kbd className="font-mono-data text-[10px] text-text-secondary dark:text-outline-variant bg-surface-variant dark:bg-white/10 px-1.5 py-0.5 rounded">
+              {cmdQuery && (
+                <button
+                  onClick={() => setCmdQuery('')}
+                  className="text-xs text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded cursor-pointer border-none bg-transparent"
+                >
+                  Clear
+                </button>
+              )}
+              <kbd className="font-mono text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded">
                 ESC
               </kbd>
             </div>
-            <ul className="max-h-72 overflow-auto">
-              {filteredCmds.length === 0 ? (
-                <li className="px-4 py-6 text-center text-text-secondary dark:text-outline-variant text-sm">
-                  No results found
-                </li>
+
+            {/* Results List */}
+            <div className="max-h-96 overflow-y-auto p-2">
+              {filteredResources.length === 0 ? (
+                <div className="px-6 py-12 text-center text-muted-foreground text-sm">
+                  <p className="font-medium text-foreground">No resources found</p>
+                  <p className="text-xs mt-1">No results matching &ldquo;{cmdQuery}&rdquo;</p>
+                </div>
               ) : (
-                filteredCmds.map((cmd) => (
-                  <li key={cmd.href}>
-                    <Link
-                      href={cmd.href}
-                      onClick={() => setCmdOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-container-low dark:hover:bg-white/5 transition-colors cursor-pointer no-underline text-text-primary dark:text-inverse-on-surface"
-                    >
-                      <span
-                        className="material-symbols-outlined text-primary dark:text-primary-fixed-dim"
-                        style={{ fontSize: '18px', fontVariationSettings: "'FILL' 0" }}
+                <div className="space-y-1">
+                  {filteredResources.map((item, idx) => {
+                    const isSelected = selectedIndex === idx;
+                    return (
+                      <div
+                        key={item.href + item.label}
+                        onClick={() => handleSelectResource(item.href)}
+                        onMouseEnter={() => setSelectedIndex(idx)}
+                        className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-foreground/10 text-foreground'
+                            : 'hover:bg-muted text-foreground'
+                        }`}
                       >
-                        {cmd.icon}
-                      </span>
-                      <span className="text-body-sm font-medium">{cmd.label}</span>
-                    </Link>
-                  </li>
-                ))
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className={`grid size-9 place-items-center rounded-lg border border-border flex-shrink-0 ${
+                            isSelected ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'
+                          }`}>
+                            <span
+                              className="material-symbols-outlined text-[20px]"
+                              style={{ fontVariationSettings: "'FILL' 0" }}
+                            >
+                              {item.icon}
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground m-0 truncate">{item.label}</p>
+                            <p className="text-xs text-muted-foreground m-0 truncate">{item.desc}</p>
+                          </div>
+                        </div>
+
+                        <span className="flex-shrink-0 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border border-border bg-muted/60 text-muted-foreground">
+                          {item.category}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </ul>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-5 py-2.5 border-t border-border bg-muted/20 text-[11px] text-muted-foreground font-mono">
+              <span>{filteredResources.length} resources available</span>
+              <div className="flex items-center gap-3">
+                <span>↑↓ navigate</span>
+                <span>↵ select</span>
+                <span>esc close</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -242,33 +309,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
 
-          {/* Search */}
-          <div className="mx-auto hidden w-full max-w-xl items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 sm:flex">
+          {/* Search Bar (Click to search resources) */}
+          <div
+            onClick={() => { setCmdOpen(true); setCmdQuery(''); setSelectedIndex(0); }}
+            className="mx-auto hidden w-full max-w-xl items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 sm:flex cursor-pointer hover:border-foreground/30 hover:bg-muted/70 transition-all select-none"
+          >
             <span
-              className="material-symbols-outlined text-muted-foreground pointer-events-none select-none text-[18px]"
+              className="material-symbols-outlined text-muted-foreground pointer-events-none text-[18px]"
               style={{ fontVariationSettings: "'FILL' 0" }}
             >
               search
             </span>
-            <input
-              type="text"
-              placeholder="Search resources..."
-              aria-label="Search resources"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
-                  toast(`Searching for "${searchQuery}"...`, 'info');
-                }
-              }}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-            />
-            <button
-              onClick={() => { setCmdOpen(true); setCmdQuery(''); }}
-              className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-            >
+            <span className="w-full text-sm text-muted-foreground">
+              Search resources...
+            </span>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors">
               ⌘K
-            </button>
+            </kbd>
           </div>
 
           {/* Right controls */}
@@ -461,7 +518,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex relative z-10">
 
         {/* ── LEFT SIDEBAR (Expand on hover) ──────────────────────── */}
-        <aside className="hidden md:flex flex-col flex-shrink-0 w-20 hover:w-64 transition-all duration-300 border-r border-border bg-background/80 backdrop-blur-md group overflow-hidden sticky top-16 h-[calc(100vh-4rem)] z-40">
+        <aside className="hidden md:flex flex-col flex-shrink-0 w-20 hover:w-64 transition-all duration-300 border-r border-border bg-background/80 backdrop-blur-md group overflow-x-hidden overflow-y-hidden no-scrollbar sticky top-16 h-[calc(100vh-4rem)] z-40 select-none">
           {/* Brand header */}
           <div className="px-5 py-5 flex items-center gap-3.5 whitespace-nowrap border-b border-border">
             <div className="grid size-9 place-items-center rounded-xl border border-border bg-card text-xs font-bold text-foreground flex-shrink-0">
@@ -478,7 +535,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Main Nav */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden no-scrollbar">
             {navItems.map((item) => {
               const isActive =
                 item.href === '/'
@@ -512,7 +569,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Bottom Nav */}
-          <div className="px-3 py-4 border-t border-border space-y-1">
+          <div className="px-3 py-4 border-t border-border space-y-1 overflow-hidden">
             {bottomNavItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (

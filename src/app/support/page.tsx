@@ -4,24 +4,25 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/WorkspaceView';
-import { Zap, Mail, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Zap, Mail, MessageCircle } from 'lucide-react';
+import { FaqAccordion } from '@/components/ui/FaqAccordion';
 
 const FAQ_ITEMS = [
   {
-    q: 'How do I enable Smart Sync?',
-    a: 'Go to Project Settings → Smart Sync, select your documentation sources and sync frequency, then click Enable Smart Sync. Requires the project:write scope.',
+    question: 'How do I enable Smart Sync?',
+    answer: 'Go to Project Settings → Smart Sync, select your documentation sources and sync frequency, then click Enable Smart Sync. Requires the project:write scope.',
   },
   {
-    q: 'What repositories can Thally connect to?',
-    a: 'Thally supports GitHub, GitLab, and Bitbucket repositories. Connect via Project Settings → Repository using a personal access token with the repo scope.',
+    question: 'What repositories can Thally connect to?',
+    answer: 'Thally supports GitHub, GitLab, and Bitbucket repositories. Connect via Project Settings → Repository using a personal access token with the repo scope.',
   },
   {
-    q: 'How is documentation reviewed before publishing?',
-    a: 'Every AI-generated proposal goes through a human review gate. A maintainer must explicitly approve or reject the proposal before it can be deployed to the live documentation portal.',
+    question: 'How is documentation reviewed before publishing?',
+    answer: 'Every AI-generated proposal goes through a human review gate. A maintainer must explicitly approve or reject the proposal before it can be deployed to the live documentation portal.',
   },
   {
-    q: 'Can I customize sync frequency?',
-    a: 'Yes. You can set the frequency to Manual, Hourly, Daily, or Weekly in Project Settings → Smart Sync. The default is Manual.',
+    question: 'Can I customize sync frequency?',
+    answer: 'Yes. You can set the frequency to Manual, Hourly, Daily, or Weekly in Project Settings → Smart Sync. The default is Manual.',
   },
 ];
 
@@ -30,34 +31,12 @@ const TICKETS = [
   { id: '1039', title: 'API schema mismatch', status: 'RESOLVED', statusClass: 'green' },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div
-      className="workspace-row flex flex-col items-start cursor-pointer select-none"
-      onClick={() => setOpen((v) => !v)}
-    >
-      <div className="flex items-center justify-between w-full">
-        <b className="text-sm text-text-primary dark:text-inverse-on-surface">{q}</b>
-        <span className="flex-shrink-0 text-text-secondary dark:text-outline-variant">
-          {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </span>
-      </div>
-      {open && (
-        <p className="text-xs text-text-secondary dark:text-[#cbc3d7] mt-2 leading-relaxed">
-          {a}
-        </p>
-      )}
-    </div>
-  );
-}
-
 export default function SupportPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
 
   const filteredFaqs = search.trim()
-    ? FAQ_ITEMS.filter((f) => f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()))
+    ? FAQ_ITEMS.filter((f) => f.question.toLowerCase().includes(search.toLowerCase()) || String(f.answer).toLowerCase().includes(search.toLowerCase()))
     : FAQ_ITEMS;
 
   return (
@@ -117,16 +96,7 @@ export default function SupportPage() {
         </div>
 
         {/* FAQ accordion */}
-        <div>
-          <h3 className="text-xs font-mono font-bold tracking-wider uppercase text-text-secondary dark:text-outline-variant mb-3">
-            Frequently Asked Questions
-          </h3>
-          <div className="panel workspace-grid">
-            {filteredFaqs.map((item) => (
-              <FAQItem key={item.q} q={item.q} a={item.a} />
-            ))}
-          </div>
-        </div>
+        <FaqAccordion items={filteredFaqs} title="Frequently Asked Questions" />
 
         {/* Open tickets */}
         <div>
