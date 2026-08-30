@@ -64,13 +64,6 @@ const DOC_META: Record<string, {
     dateModified: '2026-08-18',
     keywords: ['changelog', 'release notes', 'thally', 'v1.1.0', 'smart sync'],
   },
-  'agent-readiness': {
-    title: 'Agent Readiness Report — Thally',
-    description: 'Formal audit of the Thally documentation site for AI agent and crawler accessibility across all surfaces.',
-    datePublished: '2026-08-31',
-    dateModified: '2026-08-31',
-    keywords: ['agent readiness', 'mcp', 'json-ld', 'sitemap', 'crawler', 'thally', 'ai agent'],
-  },
 }
 
 export async function GET(

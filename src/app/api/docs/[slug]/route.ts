@@ -95,20 +95,7 @@ const DOCS_DATA: Record<string, {
     version: '1.1.0', updatedAt: '2026-08-18', publishedCommit: 'a3f8c2d',
     toc: [{ id: 'v1-1-0', title: 'v1.1.0 — Smart Sync', level: 2 }],
     prev: { title: 'FAQ', slug: 'faq' },
-    next: { title: 'Agent Readiness', slug: 'agent-readiness' },
     content: `# Changelog\n\n## v1.1.0 — Smart Sync Release {#v1-1-0}\n\nReleased 2026-08-18\n\n- Smart Sync: automated repository-triggered documentation synchronization\n- Documentation Source Selection: choose which knowledge areas to synchronize\n- Sync Frequency options: Manual, Hourly, Daily, Weekly`,
-  },
-  'agent-readiness': {
-    title: 'Agent Readiness Report', slug: 'agent-readiness',
-    version: '1.1.0', updatedAt: '2026-08-31', publishedCommit: 'b4c9e1f',
-    toc: [
-      { id: 'overview', title: 'Overview', level: 2 },
-      { id: 'surface-audit', title: 'Surface Audit', level: 2 },
-      { id: 'improvements', title: 'Applied Improvements', level: 2 },
-      { id: 'verification', title: 'Verified Guide', level: 2 },
-    ],
-    prev: { title: 'Changelog', slug: 'changelog' },
-    content: `# Agent Readiness Report\n\n## Overview {#overview}\n\nThis page formally audits the Thally documentation site for AI agent and crawler accessibility.\n\n## Surface Audit {#surface-audit}\n\n| Surface | Status | URL |\n|---|---|---|\n| HTML | Available | /docs/smart-sync |\n| Markdown/JSON | Available | /api/docs/smart-sync |\n| JSON-LD | Available | /api/docs/smart-sync/jsonld |\n| Sitemap | Available | /sitemap.xml |\n| robots.txt | Available | /robots.txt |\n| MCP | Available | /api/mcp |\n\n## Applied Improvements {#improvements}\n\n1. Added explicit AI agent user-agent rules in robots.txt\n2. Created /api/mcp Model Context Protocol manifest\n3. Created /api/docs/[slug] JSON content API\n4. Created /api/docs/[slug]/jsonld JSON-LD structured data\n5. Generated sitemap.xml\n\n## Verified Guide: Smart Sync {#verification}\n\nThe Smart Sync guide has been verified across all surfaces: HTML, JSON, JSON-LD, Sitemap, robots.txt, and MCP.`,
   },
 }
 

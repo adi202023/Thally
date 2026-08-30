@@ -12,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'troubleshooting',
     'faq',
     'changelog',
-    'agent-readiness',
   ]
 
   const docPages = docSlugs.map((slug) => ({

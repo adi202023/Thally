@@ -100,16 +100,6 @@ export async function GET() {
         markdownUrl: 'https://thally.dev/api/docs/changelog?format=markdown',
         jsonLdUrl: 'https://thally.dev/api/docs/changelog/jsonld',
       },
-      {
-        uri: 'thally-docs://agent-readiness',
-        name: 'Agent Readiness Report',
-        description: 'Formal audit of Thally documentation for AI agent accessibility across HTML, JSON, JSON-LD, Sitemap, and MCP surfaces.',
-        mimeType: 'application/json',
-        href: 'https://thally.dev/api/docs/agent-readiness',
-        htmlUrl: 'https://thally.dev/docs/agent-readiness',
-        markdownUrl: 'https://thally.dev/api/docs/agent-readiness?format=markdown',
-        jsonLdUrl: 'https://thally.dev/api/docs/agent-readiness/jsonld',
-      },
     ],
     search: {
       endpoint: 'https://thally.dev/api/docs',

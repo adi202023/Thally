@@ -34,13 +34,6 @@ export default function DocsHomePage() {
       badge: 'Quickstart',
     },
     {
-      title: 'Agent Readiness Report',
-      slug: 'agent-readiness',
-      desc: 'Audit of documentation accessibility across HTML, Markdown, JSON, JSON-LD, Sitemap, and MCP surfaces.',
-      icon: <Zap size={20} className="text-[#7dffbd]" />,
-      badge: 'Agent Ready',
-    },
-    {
       title: 'Project Settings',
       slug: 'project-settings',
       desc: 'Configure repository webhooks, analysis sensitivity, and team assignments.',

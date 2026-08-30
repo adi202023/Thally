@@ -39,7 +39,6 @@ const SEARCH_RESOURCES = [
   { label: 'Infrastructure', category: 'Pages', desc: 'Compute & storage cluster telemetry and node status', href: '/changes', icon: 'developer_board' },
   { label: 'Security & Verification', category: 'Pages', desc: 'Security protocols, compliance, and policy checks', href: '/verification', icon: 'shield_with_heart' },
   { label: 'Documentation Portal', category: 'Documentation', desc: 'Knowledge areas, specs, and product guides', href: '/docs', icon: 'menu_book' },
-  { label: 'Agent Readiness Report', category: 'Documentation', desc: 'Full surface audit: HTML, Markdown, JSON, JSON-LD, Sitemap & MCP', href: '/docs/agent-readiness', icon: 'verified' },
   { label: 'Smart Sync Guide', category: 'Documentation', desc: 'Connected repo sync setup and workflow guide', href: '/docs/smart-sync', icon: 'sync' },
   { label: 'Permissions & Scopes', category: 'Documentation', desc: 'RBAC scopes, access levels, and role definitions', href: '/docs/permissions', icon: 'key' },
   { label: 'Agent Knowledge', category: 'AI Agent', desc: 'Ask natural language questions with verified provenance citations', href: '/agent', icon: 'smart_toy' },
