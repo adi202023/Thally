@@ -12,9 +12,12 @@ import {
   Sliders,
   Zap,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/WorkspaceView';
 
 export default function DocsHomePage() {
+  const router = useRouter();
+
   const docCards = [
     {
       title: 'Smart Sync Guide',
@@ -66,7 +69,7 @@ export default function DocsHomePage() {
         action={{
           label: 'Open live workspace',
           icon: <Zap size={15} />,
-          onClick: () => {},
+          onClick: () => router.push('/docs/smart-sync'),
         }}
         actionTestId="docs-primary-action"
       />

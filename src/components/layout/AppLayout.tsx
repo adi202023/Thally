@@ -1,8 +1,20 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+
+// Shared hook: close a panel when clicking outside its ref
+function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
+  useEffect(() => {
+    const listener = (e: MouseEvent) => {
+      if (!ref.current || ref.current.contains(e.target as Node)) return;
+      handler();
+    };
+    document.addEventListener('mousedown', listener);
+    return () => document.removeEventListener('mousedown', listener);
+  }, [ref, handler]);
+}
 
 // Toast notification system
 function useToast() {
@@ -39,6 +51,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [cmdQuery, setCmdQuery] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { toasts, toast } = useToast();
+
+  // Dropdown state
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notifRead, setNotifRead] = useState(false);
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(notifRef, () => setNotifOpen(false));
+  useClickOutside(settingsRef, () => setSettingsOpen(false));
+  useClickOutside(workspaceRef, () => setWorkspaceOpen(false));
+  useClickOutside(profileRef, () => setProfileOpen(false));
 
   // Theme init
   useEffect(() => {
@@ -84,7 +113,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const bottomNavItems = [
     { label: 'Docs', href: '/docs', icon: 'menu_book' },
-    { label: 'Support', href: '/agent', icon: 'help' },
+    { label: 'Support', href: '/support', icon: 'help' },
   ];
 
   const filteredCmds = COMMANDS.filter((c) =>
@@ -238,6 +267,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+
+          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
             className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
@@ -247,44 +278,177 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           >
             {isDark ? 'light_mode' : 'dark_mode'}
           </button>
-          <button
-            onClick={() => toast('No new notifications', 'info')}
-            className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
-            style={{ fontVariationSettings: "'FILL' 0" }}
-            title="Notifications"
-            aria-label="Notifications"
-          >
-            notifications
-          </button>
-          <button
-            onClick={() => toast('Settings coming soon', 'info')}
-            className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
-            style={{ fontVariationSettings: "'FILL' 0" }}
-            title="Settings"
-            aria-label="Settings"
-          >
-            settings
-          </button>
-          <button
-            onClick={() => toast('Infrastructure panel coming soon', 'info')}
-            className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
-            style={{ fontVariationSettings: "'FILL' 0" }}
-            title="DNS"
-            aria-label="DNS"
-          >
-            dns
-          </button>
-          <button
-            onClick={() => toast('Profile coming soon', 'info')}
-            className="ml-1 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
-            aria-label="Profile"
-          >
-            <img
-              className="w-8 h-8 rounded-full border border-border-subtle dark:border-white/10 object-cover"
-              alt="User profile"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkcj3GDWtVU0nSrrv_cNjlSR7iz5Kg1zuePzrJ6aenUytdJK33QFEspXmAXgcm24thNagHo4eppNrrEkWXZi-LqFP4mNG7zHGpk_R25xHklVd8UOKNPUKBeX-4XuuwoSfrxKqMhNFD0wW8ccLeckHj4TLFUG2U0nwR0CkwgANJSavcVotmTuaCy76hYLasfxxOUjMBTJtea_uzlYwioFwuurLQWYHqhs3GjPlPQFNL6m0MoYOkyETC"
-            />
-          </button>
+
+          {/* ── Bell / Notifications ─────────────────────────────── */}
+          <div ref={notifRef} className="relative">
+            <button
+              onClick={() => { setNotifOpen((v) => !v); setSettingsOpen(false); setWorkspaceOpen(false); setProfileOpen(false); }}
+              className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
+              style={{ fontVariationSettings: notifRead ? "'FILL' 1" : "'FILL' 0" }}
+              title="Notifications"
+              aria-label="Notifications"
+            >
+              {notifRead ? 'notifications' : 'notifications_unread'}
+            </button>
+            {notifOpen && (
+              <div className="glass-card absolute top-[calc(100%+10px)] right-0 w-80 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border-subtle dark:border-white/10">
+                <div className="p-3.5 pb-2.5 border-b border-border-subtle dark:border-white/10 flex items-center justify-between">
+                  <span className="font-bold text-xs text-text-primary dark:text-inverse-on-surface">Notifications</span>
+                  <button onClick={() => setNotifRead(true)} className="text-xs text-primary dark:text-[#d0bcff] bg-transparent border-none cursor-pointer font-semibold hover:underline">Mark all as read</button>
+                </div>
+                {[
+                  { dot: 'bg-primary', title: 'Smart Sync completed', time: '10m ago' },
+                  { dot: 'bg-red-500', title: 'New conflict detected in Schema Definition', time: '1h ago' },
+                  { dot: 'bg-green-500', title: 'Deployment verified', time: '2h ago' },
+                ].map((n) => (
+                  <div key={n.title} className="flex items-start gap-2.5 p-3.5 border-b border-border-subtle dark:border-white/5 hover:bg-surface-container-low dark:hover:bg-white/5 transition-colors">
+                    <div className={`${n.dot} ${notifRead ? 'opacity-30' : ''} w-2 h-2 rounded-full flex-shrink-0 mt-1`} />
+                    <div>
+                      <p className="text-xs font-semibold text-text-primary dark:text-inverse-on-surface m-0 leading-tight">{n.title}</p>
+                      <p className="text-[10px] font-mono text-text-secondary dark:text-outline-variant mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Gear / Settings ──────────────────────────────────── */}
+          <div ref={settingsRef} className="relative">
+            <button
+              onClick={() => { setSettingsOpen((v) => !v); setNotifOpen(false); setWorkspaceOpen(false); setProfileOpen(false); }}
+              className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
+              style={{ fontVariationSettings: "'FILL' 0" }}
+              title="Settings"
+              aria-label="Settings"
+            >
+              settings
+            </button>
+            {settingsOpen && (
+              <div className="glass-card absolute top-[calc(100%+10px)] right-0 w-80 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border-subtle dark:border-white/10">
+                <div className="p-3.5 pb-2.5 border-b border-border-subtle dark:border-white/10">
+                  <span className="font-bold text-xs text-text-primary dark:text-inverse-on-surface">Settings</span>
+                </div>
+                {/* Account */}
+                <div className="p-3.5 border-b border-border-subtle dark:border-white/10">
+                  <p className="text-[10px] font-mono font-bold tracking-wider uppercase text-text-secondary dark:text-outline-variant mb-2">Account</p>
+                  <div className="flex flex-col gap-2">
+                    {[{ label: 'Name', value: 'Aditya Sheregar' }, { label: 'Email', value: 'aditya@thally.io' }].map((f) => (
+                      <div key={f.label} className="flex justify-between items-center text-xs">
+                        <span className="text-text-secondary dark:text-[#cbc3d7]">{f.label}</span>
+                        <span className="font-medium text-text-primary dark:text-inverse-on-surface">{f.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Preferences */}
+                <div className="p-3.5 border-b border-border-subtle dark:border-white/10">
+                  <p className="text-[10px] font-mono font-bold tracking-wider uppercase text-text-secondary dark:text-outline-variant mb-2">Preferences</p>
+                  <div className="flex flex-col gap-2">
+                    {[{ label: 'Dark Mode', active: isDark, toggle: toggleTheme }, { label: 'Email Notifications', active: true, toggle: () => {} }, { label: 'Sync Alerts', active: false, toggle: () => {} }].map((p) => (
+                      <div key={p.label} className="flex justify-between items-center text-xs">
+                        <span className="text-text-secondary dark:text-[#cbc3d7]">{p.label}</span>
+                        <button onClick={p.toggle} className={`w-9 h-5 rounded-full border-none cursor-pointer transition-colors relative ${p.active ? 'bg-primary dark:bg-primary-fixed-dim' : 'bg-surface-variant dark:bg-white/20'}`}>
+                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm ${p.active ? 'left-4' : 'left-0.5'}`} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Integrations */}
+                <div className="p-3.5">
+                  <p className="text-[10px] font-mono font-bold tracking-wider uppercase text-text-secondary dark:text-outline-variant mb-2">Integrations</p>
+                  <div className="flex flex-col gap-2">
+                    {[{ name: 'GitHub', status: 'Connected', ok: true }, { name: 'GitLab', status: 'Not connected', ok: false }].map((int) => (
+                      <div key={int.name} className="flex justify-between items-center text-xs">
+                        <span className="font-medium text-text-primary dark:text-inverse-on-surface">{int.name}</span>
+                        <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border ${int.ok ? 'text-green-700 dark:text-green-300 bg-green-500/10 dark:bg-green-500/20 border-green-500/30' : 'text-text-secondary dark:text-outline-variant bg-surface-container dark:bg-white/5 border-border-subtle dark:border-white/10'}`}>{int.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── DNS / Workspace switcher ──────────────────────────── */}
+          <div ref={workspaceRef} className="relative">
+            <button
+              onClick={() => { setWorkspaceOpen((v) => !v); setNotifOpen(false); setSettingsOpen(false); setProfileOpen(false); }}
+              className="material-symbols-outlined text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-all hover:bg-surface-container-low dark:hover:bg-white/10 p-2 rounded-full hover:text-primary"
+              style={{ fontVariationSettings: "'FILL' 0" }}
+              title="Switch workspace"
+              aria-label="Switch workspace"
+            >
+              dns
+            </button>
+            {workspaceOpen && (
+              <div className="glass-card absolute top-[calc(100%+10px)] right-0 w-64 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border-subtle dark:border-white/10">
+                <div className="p-3.5 pb-2.5 border-b border-border-subtle dark:border-white/10">
+                  <span className="font-bold text-xs text-text-primary dark:text-inverse-on-surface">Workspaces</span>
+                </div>
+                <div className="p-2">
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40">
+                    <span className="material-symbols-outlined text-primary dark:text-[#d0bcff] text-lg">check_circle</span>
+                    <div>
+                      <p className="text-xs font-semibold text-text-primary dark:text-inverse-on-surface m-0">Thally — Ethereal Forge</p>
+                      <p className="text-[10px] font-mono text-text-secondary dark:text-outline-variant m-0">current</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setWorkspaceOpen(false); toast('New workspace coming soon', 'info'); }}
+                    className="flex items-center gap-2 w-full mt-1.5 p-2.5 rounded-lg border-none bg-transparent cursor-pointer text-xs text-primary dark:text-[#d0bcff] font-medium hover:bg-primary/5 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">add</span>
+                    + New workspace
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Profile avatar ───────────────────────────────────── */}
+          <div ref={profileRef} className="relative">
+            <button
+              onClick={() => { setProfileOpen((v) => !v); setNotifOpen(false); setSettingsOpen(false); setWorkspaceOpen(false); }}
+              className="ml-1 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
+              aria-label="Profile"
+            >
+              <img
+                className="w-8 h-8 rounded-full border border-border-subtle dark:border-white/10 object-cover"
+                alt="User profile"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkcj3GDWtVU0nSrrv_cNjlSR7iz5Kg1zuePzrJ6aenUytdJK33QFEspXmAXgcm24thNagHo4eppNrrEkWXZi-LqFP4mNG7zHGpk_R25xHklVd8UOKNPUKBeX-4XuuwoSfrxKqMhNFD0wW8ccLeckHj4TLFUG2U0nwR0CkwgANJSavcVotmTuaCy76hYLasfxxOUjMBTJtea_uzlYwioFwuurLQWYHqhs3GjPlPQFNL6m0MoYOkyETC"
+              />
+            </button>
+            {profileOpen && (
+              <div className="glass-card absolute top-[calc(100%+10px)] right-0 w-56 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border-subtle dark:border-white/10">
+                <div className="p-3.5 border-b border-border-subtle dark:border-white/10 flex items-center gap-2.5">
+                  <img className="w-8 h-8 rounded-full border border-border-subtle object-cover" alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkcj3GDWtVU0nSrrv_cNjlSR7iz5Kg1zuePzrJ6aenUytdJK33QFEspXmAXgcm24thNagHo4eppNrrEkWXZi-LqFP4mNG7zHGpk_R25xHklVd8UOKNPUKBeX-4XuuwoSfrxKqMhNFD0wW8ccLeckHj4TLFUG2U0nwR0CkwgANJSavcVotmTuaCy76hYLasfxxOUjMBTJtea_uzlYwioFwuurLQWYHqhs3GjPlPQFNL6m0MoYOkyETC" />
+                  <div>
+                    <p className="text-xs font-bold text-text-primary dark:text-inverse-on-surface m-0">Aditya Sheregar</p>
+                    <p className="text-[10px] font-mono text-text-secondary dark:text-outline-variant m-0">aditya@thally.io</p>
+                  </div>
+                </div>
+                <div className="p-1.5">
+                  {[
+                    { label: 'Settings', icon: 'settings', action: () => { setProfileOpen(false); setSettingsOpen(true); } },
+                    { label: 'Support', icon: 'help', action: () => { setProfileOpen(false); router.push('/support'); } },
+                    { label: 'Log out', icon: 'logout', action: () => { setProfileOpen(false); toast('Logged out', 'info'); } },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={item.action}
+                      className={`flex items-center gap-2.5 w-full p-2 rounded-lg border-none bg-transparent cursor-pointer text-xs font-medium text-left text-text-primary dark:text-inverse-on-surface hover:bg-surface-container-low dark:hover:bg-white/5 transition-colors ${item.label === 'Log out' ? 'text-red-500 dark:text-red-400' : ''}`}
+                    >
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
       </nav>
 

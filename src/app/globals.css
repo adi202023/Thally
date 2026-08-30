@@ -121,6 +121,40 @@ body {
   animation: dash-reverse 1s linear infinite;
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.suggestion-chip:hover {
+  background: rgba(107, 56, 212, 0.15) !important;
+  border-color: rgba(107, 56, 212, 0.4) !important;
+}
+
+.dark .dark-muted {
+  color: #cbc3d7;
+}
+
+.dark .dark-body {
+  color: #cbc3d7;
+}
+
+.dark .dark-list-item {
+  color: #f0f1f2;
+}
+
+.dark .dark-answer-header {
+  background: rgba(107, 56, 212, 0.08);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .dark-verified-badge {
+  background: rgba(74, 222, 128, 0.1);
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.25);
+}
+
+
 /* Diff Viewer Styles */
 .diff-added {
   background-color: rgba(74, 222, 128, 0.12);

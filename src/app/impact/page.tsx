@@ -209,84 +209,221 @@ export default function ImpactDetailsPage() {
 
           {/* Right Column: Impact Graph (4 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6 fade-in-up stagger-2">
-            {/* Topological Map */}
-            <div className="glass-card rounded-xl p-card-padding h-full min-h-[400px] flex flex-col relative overflow-hidden">
-              <h3 className="font-headline-lg-mobile text-text-primary dark:text-inverse-on-surface mb-4 flex items-center gap-2 z-10 font-bold">
-                <span className="material-symbols-outlined text-primary dark:text-primary-fixed">
-                  hub
+            {/* Topological Map Card */}
+            <div className="glass-card rounded-xl p-5 flex flex-col relative overflow-hidden">
+              <div className="flex items-center justify-between mb-4 z-10">
+                <h3 className="font-headline-lg-mobile text-text-primary dark:text-inverse-on-surface flex items-center gap-2 font-bold text-base">
+                  <span className="material-symbols-outlined text-primary dark:text-primary-fixed">
+                    hub
+                  </span>
+                  Dependency Impact
+                </h3>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-fixed-dim border border-primary/20">
+                  3 Connected
                 </span>
-                Dependency Impact
-              </h3>
+              </div>
 
-              <div className="flex-1 relative z-10 flex flex-col justify-center items-center gap-6 py-8">
-                {/* Core Change Node */}
-                <div className="bg-primary-container dark:bg-primary text-on-primary-container dark:text-white px-4 py-2 rounded-lg font-mono-data text-sm shadow-md border border-primary dark:border-primary-fixed/50 z-20 magnetic-btn cursor-pointer transition-transform">
-                  Auth Middleware
-                </div>
+              <p className="text-xs text-text-secondary dark:text-[#a0a5ab] mb-4 z-10">
+                Visualizing blast radius from <span className="font-mono text-primary dark:text-[#d0bcff]">auth.ts</span> modifications.
+              </p>
 
-                {/* Connecting Lines (SVG) */}
+              {/* Topological Graph Canvas */}
+              <div className="relative w-full rounded-xl bg-surface-container-lowest/50 dark:bg-[#121316]/60 border border-border-subtle dark:border-white/5 p-4 flex flex-col items-center">
+                
+                {/* SVG Connecting Lines - Responsive viewBox 0 0 340 260 */}
                 <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none z-0"
+                  viewBox="0 0 340 260"
+                  className="w-full h-auto max-h-[300px] select-none"
                   style={{ overflow: 'visible' }}
                 >
+                  <defs>
+                    <linearGradient id="lineGradPrimary" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#6b38d4" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
+                    </linearGradient>
+                    <linearGradient id="lineGradIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#6b38d4" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.8" />
+                    </linearGradient>
+                    <linearGradient id="lineGradRose" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.8" />
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#6b38d4" floodOpacity="0.3" />
+                    </filter>
+                  </defs>
+
+                  {/* Connecting Paths */}
+                  {/* Auth Middleware -> API Gateway (Left) */}
                   <path
-                    className="text-outline-variant dark:text-outline"
-                    d="M 150 120 L 80 220"
+                    d="M 170 55 C 170 100, 75 90, 75 125"
                     fill="none"
-                    stroke="currentColor"
-                    strokeDasharray="4"
+                    stroke="url(#lineGradPrimary)"
                     strokeWidth="2"
+                    strokeDasharray="5 5"
+                    className="path-animate"
                   />
+
+                  {/* Auth Middleware -> User Service (Right) */}
                   <path
-                    className="text-outline-variant dark:text-outline"
-                    d="M 150 120 L 220 220"
+                    d="M 170 55 C 170 100, 265 90, 265 125"
                     fill="none"
-                    stroke="currentColor"
-                    strokeDasharray="4"
+                    stroke="url(#lineGradIndigo)"
                     strokeWidth="2"
+                    strokeDasharray="5 5"
+                    className="path-animate"
                   />
+
+                  {/* User Service & Center -> Checkout Flow (Bottom) */}
                   <path
-                    className="text-outline-variant dark:text-outline"
-                    d="M 150 120 L 150 300"
+                    d="M 170 55 L 170 200"
                     fill="none"
-                    stroke="currentColor"
-                    strokeDasharray="4"
+                    stroke="url(#lineGradRose)"
                     strokeWidth="2"
+                    strokeDasharray="5 5"
+                    className="path-animate-reverse"
                   />
+
+                  {/* ── Node 1: Auth Middleware (Root / Center Top) ── */}
+                  <g transform="translate(170, 32)">
+                    <rect
+                      x="-80"
+                      y="-18"
+                      width="160"
+                      height="36"
+                      rx="8"
+                      className="fill-primary dark:fill-[#6b38d4] stroke-white/30 dark:stroke-white/20"
+                      strokeWidth="1.5"
+                      filter="url(#glow)"
+                    />
+                    <circle cx="-62" cy="0" r="4" className="fill-green-400 animate-ping opacity-75" />
+                    <circle cx="-62" cy="0" r="3.5" className="fill-green-400" />
+                    <text
+                      x="-48"
+                      y="4"
+                      className="fill-white font-mono text-[11px] font-bold tracking-tight"
+                    >
+                      Auth Middleware
+                    </text>
+                    <rect
+                      x="40"
+                      y="-10"
+                      width="32"
+                      height="18"
+                      rx="4"
+                      className="fill-white/20"
+                    />
+                    <text
+                      x="56"
+                      y="3"
+                      textAnchor="middle"
+                      className="fill-white font-mono text-[9px] font-bold"
+                    >
+                      PR
+                    </text>
+                  </g>
+
+                  {/* ── Node 2: API Gateway (Left Middle) ── */}
+                  <g transform="translate(75, 145)">
+                    <rect
+                      x="-65"
+                      y="-20"
+                      width="130"
+                      height="40"
+                      rx="8"
+                      className="fill-white dark:fill-[#1e2028] stroke-amber-400 dark:stroke-amber-500/60"
+                      strokeWidth="1.5"
+                    />
+                    <circle cx="-46" cy="-2" r="3" className="fill-amber-500" />
+                    <text
+                      x="-34"
+                      y="2"
+                      className="fill-text-primary dark:fill-[#e5e7eb] font-mono text-[10px] font-semibold"
+                    >
+                      API Gateway
+                    </text>
+                    <text
+                      x="-46"
+                      y="14"
+                      className="fill-amber-600 dark:fill-amber-400 font-mono text-[8px] font-medium"
+                    >
+                      Latency: -12ms
+                    </text>
+                  </g>
+
+                  {/* ── Node 3: User Service (Right Middle) ── */}
+                  <g transform="translate(265, 145)">
+                    <rect
+                      x="-65"
+                      y="-20"
+                      width="130"
+                      height="40"
+                      rx="8"
+                      className="fill-white dark:fill-[#1e2028] stroke-primary/30 dark:stroke-primary/50"
+                      strokeWidth="1.5"
+                    />
+                    <circle cx="-46" cy="-2" r="3" className="fill-primary dark:fill-[#a78bfa]" />
+                    <text
+                      x="-34"
+                      y="2"
+                      className="fill-text-primary dark:fill-[#e5e7eb] font-mono text-[10px] font-semibold"
+                    >
+                      User Service
+                    </text>
+                    <text
+                      x="-46"
+                      y="14"
+                      className="fill-text-secondary dark:fill-[#a0a5ab] font-mono text-[8px] font-medium"
+                    >
+                      JWT Consumer
+                    </text>
+                  </g>
+
+                  {/* ── Node 4: Checkout Flow (Bottom Center) ── */}
+                  <g transform="translate(170, 225)">
+                    <rect
+                      x="-70"
+                      y="-20"
+                      width="140"
+                      height="40"
+                      rx="8"
+                      className="fill-white dark:fill-[#1e2028] stroke-border-subtle dark:stroke-white/10"
+                      strokeWidth="1.5"
+                    />
+                    <circle cx="-52" cy="-2" r="3" className="fill-rose-500" />
+                    <text
+                      x="-40"
+                      y="2"
+                      className="fill-text-primary dark:fill-[#e5e7eb] font-mono text-[10px] font-semibold"
+                    >
+                      Checkout Flow
+                    </text>
+                    <text
+                      x="-52"
+                      y="14"
+                      className="fill-text-secondary dark:fill-[#a0a5ab] font-mono text-[8px] font-medium"
+                    >
+                      Downstream Impact
+                    </text>
+                  </g>
                 </svg>
+              </div>
 
-                {/* Impacted Nodes */}
-                <div className="flex justify-between w-full px-4 z-20 gap-2">
-                  <div className="bg-surface dark:bg-[#25272c] text-text-primary dark:text-[#e5e7eb] px-3 py-2 rounded-lg font-mono-data text-xs border border-amber-300 dark:border-amber-500/50 shadow-sm flex flex-col items-center gap-1 magnetic-btn cursor-pointer">
-                    <span
-                      className="material-symbols-outlined text-amber-500"
-                      style={{ fontSize: '16px' }}
-                    >
-                      api
-                    </span>
-                    API Gateway
-                  </div>
-
-                  <div className="bg-surface dark:bg-[#25272c] text-text-primary dark:text-[#e5e7eb] px-3 py-2 rounded-lg font-mono-data text-xs border border-outline-variant dark:border-white/10 shadow-sm flex flex-col items-center gap-1 magnetic-btn cursor-pointer opacity-70">
-                    <span
-                      className="material-symbols-outlined text-outline dark:text-outline-variant"
-                      style={{ fontSize: '16px' }}
-                    >
-                      group
-                    </span>
-                    User Service
-                  </div>
-                </div>
-
-                <div className="bg-surface dark:bg-[#25272c] text-text-primary dark:text-[#e5e7eb] px-3 py-2 rounded-lg font-mono-data text-xs border border-outline-variant dark:border-white/10 shadow-sm flex flex-col items-center gap-1 z-20 mt-4 magnetic-btn cursor-pointer opacity-70">
-                  <span
-                    className="material-symbols-outlined text-outline dark:text-outline-variant"
-                    style={{ fontSize: '16px' }}
-                  >
-                    shopping_cart
-                  </span>
-                  Checkout Flow
-                </div>
+              {/* Legend & Meta details */}
+              <div className="mt-4 pt-3 border-t border-border-subtle dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-text-secondary dark:text-outline-variant">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary" />
+                  Source Node
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Direct
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  Cascading
+                </span>
               </div>
 
               {/* Decorative Background Glow */}
