@@ -4,20 +4,47 @@
 /* ─── Ethereal Forge Design System Styles ────────────────────────────────── */
 
 :root {
-  --primary: #6b38d4;
-  --accent-indigo: #4f46e5;
-  --surface: #f8f9fa;
-  --surface-dark: #191c1d;
-  --glass-surface: rgba(255, 255, 255, 0.7);
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --accent-indigo: #27272a;
+  --surface: #ffffff;
+  --surface-dark: #090a0f;
+  --glass-surface: rgba(255, 255, 255, 0.85);
   --border-subtle: rgba(0, 0, 0, 0.08);
-  --text-primary: #1A1A1E;
-  --text-secondary: #4A4A4E;
+  --text-primary: #141416;
+  --text-secondary: #71717a;
+  --background: #ffffff;
+  --foreground: #141416;
+  --card: #ffffff;
+  --card-foreground: #141416;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+}
+
+.dark {
+  --primary: #f4f4f6;
+  --primary-foreground: #090a0f;
+  --accent-indigo: #27272a;
+  --surface: #111216;
+  --surface-dark: #090a0f;
+  --glass-surface: rgba(17, 18, 22, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --text-primary: #f4f4f6;
+  --text-secondary: #8a8d98;
+  --background: #090a0f;
+  --foreground: #f4f4f6;
+  --card: #111216;
+  --card-foreground: #f4f4f6;
+  --muted: #18191e;
+  --muted-foreground: #8a8d98;
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 body {
   font-family: 'Geist', system-ui, -apple-system, sans-serif;
-  background-color: #f8f9fa;
-  color: #1A1A1E;
+  background-color: var(--background);
+  color: var(--foreground);
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -25,8 +52,8 @@ body {
 }
 
 .dark body {
-  background-color: #191c1d;
-  color: #f0f1f2;
+  background-color: #090a0f;
+  color: #f4f4f6;
 }
 
 .grid-bg {
@@ -127,24 +154,24 @@ body {
 }
 
 .suggestion-chip:hover {
-  background: rgba(107, 56, 212, 0.15) !important;
-  border-color: rgba(107, 56, 212, 0.4) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
 .dark .dark-muted {
-  color: #cbc3d7;
+  color: #8a8d98;
 }
 
 .dark .dark-body {
-  color: #cbc3d7;
+  color: #8a8d98;
 }
 
 .dark .dark-list-item {
-  color: #f0f1f2;
+  color: #f4f4f6;
 }
 
 .dark .dark-answer-header {
-  background: rgba(107, 56, 212, 0.08);
+  background: rgba(255, 255, 255, 0.04);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -252,11 +279,11 @@ body {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6b38d4;
+  color: var(--foreground);
 }
 
 .dark .eyebrow {
-  color: #d0bcff;
+  color: #f4f4f6;
 }
 
 .neon-button {
@@ -264,14 +291,14 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #6b38d4, #4f46e5);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--foreground);
+  color: var(--background);
+  border: 1px solid var(--border);
   border-radius: 9999px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(107, 56, 212, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
@@ -279,7 +306,7 @@ body {
 }
 
 .neon-button:hover {
-  box-shadow: 0 0 24px rgba(107, 56, 212, 0.5);
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
@@ -528,22 +555,22 @@ body {
   left: 50%;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #6b38d4, rgba(107, 56, 212, 0.2));
+  background: var(--border);
 }
 
 .pipeline-node {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(107, 56, 212, 0.3);
-  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid var(--border);
+  background: var(--card);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  color: #7b7486;
+  color: var(--muted-foreground);
   position: relative;
   z-index: 1;
   transition: all 0.2s ease;
@@ -554,28 +581,27 @@ body {
 }
 
 .pipeline-node.active {
-  border-color: #6b38d4;
-  background: #6b38d4;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(107, 56, 212, 0.4);
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
 }
 
 .pipeline-node.done {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
 .dark .pipeline-node.done {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(16, 185, 129, 0.15);
 }
 
 .pipeline-step i {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 10px;
   font-style: normal;
   font-family: 'JetBrains Mono', monospace;
-  color: #7b7486;
+  color: var(--muted-foreground);
   text-align: center;
   white-space: nowrap;
 }
@@ -626,82 +652,83 @@ body {
 .docs-prose .prose-h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #6b38d4;
+  color: var(--foreground);
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
 
 .dark .docs-prose .prose-h3 {
-  color: #63f5ff;
+  color: #f4f4f6;
 }
 
 .docs-prose .prose-strong {
   font-weight: 700;
-  color: #1A1A1E;
+  color: var(--foreground);
 }
 
 .dark .docs-prose .prose-strong {
-  color: #eef6ff;
+  color: #f4f4f6;
 }
 
 .docs-prose .prose-em {
   font-style: italic;
-  color: #4A4A4E;
+  color: var(--muted-foreground);
 }
 
 .dark .docs-prose .prose-em {
-  color: #8192ab;
+  color: #8a8d98;
 }
 
 .docs-prose .prose-p {
   font-size: 0.875rem;
-  color: #4A4A4E;
+  color: var(--muted-foreground);
   line-height: 1.6;
   margin-bottom: 1rem;
 }
 
 .dark .docs-prose .prose-p {
-  color: #8192ab;
+  color: #8a8d98;
 }
 
 .docs-prose .prose-code {
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(107, 56, 212, 0.08);
-  border: 1px solid rgba(107, 56, 212, 0.2);
-  color: #6b38d4;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  color: var(--foreground);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
 }
 
 .dark .docs-prose .prose-code {
-  background: rgba(99, 245, 255, 0.1);
-  border-color: rgba(99, 245, 255, 0.25);
-  color: #63f5ff;
+  background: #18191e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f4f4f6;
 }
 
 .docs-prose .prose-pre {
   padding: 1rem;
   border-radius: 8px;
-  background: #f3f4f5;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--muted);
+  border: 1px solid var(--border);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
-  color: #1A1A1E;
+  color: var(--foreground);
   overflow-x: auto;
   margin: 0.75rem 0;
 }
 
 .dark .docs-prose .prose-pre {
-  background: #03060c;
-  border-color: rgba(143, 185, 220, 0.16);
-  color: #7dffbd;
+  background: #090a0f;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f4f4f6;
 }
 
 .docs-prose .prose-link {
-  color: #6b38d4;
+  color: var(--foreground);
   text-decoration: underline;
   transition: opacity 0.2s;
+  font-weight: 600;
 }
 
 .docs-prose .prose-link:hover {
@@ -709,7 +736,7 @@ body {
 }
 
 .dark .docs-prose .prose-link {
-  color: #63f5ff;
+  color: #f4f4f6;
 }
 
 /* Markdown tables inside docs-prose */
@@ -723,21 +750,21 @@ body {
 .docs-prose table th,
 .docs-prose table td {
   padding: 8px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
   text-align: left;
-  color: #1A1A1E;
+  color: var(--foreground);
 }
 
 .dark .docs-prose table th,
 .dark .docs-prose table td {
-  border-color: rgba(143, 185, 220, 0.12);
-  color: #eef6ff;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f4f4f6;
 }
 
 .docs-prose table th {
-  background: rgba(107, 56, 212, 0.06);
+  background: var(--muted);
   font-weight: 700;
-  color: #6b38d4;
+  color: var(--foreground);
 }
 
 .dark .docs-prose table th {

@@ -238,19 +238,19 @@ export default function ImpactDetailsPage() {
                 >
                   <defs>
                     <linearGradient id="lineGradPrimary" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#6b38d4" stopOpacity="0.8" />
+                      <stop offset="0%" stopColor="#71717a" stopOpacity="0.8" />
                       <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
                     </linearGradient>
                     <linearGradient id="lineGradIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#6b38d4" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.8" />
+                      <stop offset="0%" stopColor="#71717a" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.8" />
                     </linearGradient>
                     <linearGradient id="lineGradRose" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.8" />
+                      <stop offset="0%" stopColor="#71717a" stopOpacity="0.8" />
                       <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.8" />
                     </linearGradient>
                     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#6b38d4" floodOpacity="0.3" />
+                      <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.3" />
                     </filter>
                   </defs>
 
@@ -293,7 +293,7 @@ export default function ImpactDetailsPage() {
                       width="160"
                       height="36"
                       rx="8"
-                      className="fill-primary dark:fill-[#6b38d4] stroke-white/30 dark:stroke-white/20"
+                      className="fill-foreground stroke-border"
                       strokeWidth="1.5"
                       filter="url(#glow)"
                     />

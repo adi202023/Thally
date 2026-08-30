@@ -160,7 +160,7 @@ export default function AgentPage() {
               type="submit"
               data-testid="agent-submit-button"
               disabled={loading || !query.trim()}
-              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-accent-indigo text-white border-none rounded-full text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 shadow-sm transition-opacity"
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-foreground text-background border-none rounded-full text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 shadow-sm transition-opacity"
             >
               <Send size={13} />
               Ask agent
@@ -176,7 +176,7 @@ export default function AgentPage() {
               type="button"
               onClick={() => { setQuery(s); handleSubmit(s); }}
               data-testid={`suggestion-${s.slice(0, 8).replaceAll(' ', '-')}`}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/10 dark:bg-primary/20 text-primary dark:text-[#d0bcff] border border-primary/20 dark:border-primary/40 hover:bg-primary/20 dark:hover:bg-primary/30 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-muted text-foreground border border-border hover:bg-muted/80 transition-all cursor-pointer"
             >
               {s}
             </button>
@@ -186,15 +186,15 @@ export default function AgentPage() {
         {/* Loading state */}
         {loading && (
           <div className="panel p-6 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 flex items-center justify-center flex-shrink-0">
-              <Bot size={16} className="text-primary dark:text-[#d0bcff]" />
+            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center flex-shrink-0">
+              <Bot size={16} className="text-foreground" />
             </div>
             <div className="flex gap-1.5 items-center">
-              <span className="text-sm font-medium text-text-secondary dark:text-outline-variant">Thinking</span>
+              <span className="text-sm font-medium text-muted-foreground">Thinking</span>
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-primary dark:bg-[#d0bcff] inline-block animate-pulse"
+                  className="w-1.5 h-1.5 rounded-full bg-foreground inline-block animate-pulse"
                   style={{ animationDelay: `${i * 200}ms` }}
                 />
               ))}
@@ -206,41 +206,41 @@ export default function AgentPage() {
         {!loading && answer && (
           <section className="panel overflow-hidden" data-testid="agent-answer-panel">
             {/* Answer header */}
-            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border-subtle dark:border-white/10 bg-primary/5 dark:bg-primary/10">
-              <div className="w-7 h-7 rounded-full bg-primary/15 dark:bg-primary/30 border border-primary/25 dark:border-primary/40 flex items-center justify-center flex-shrink-0">
-                <Bot size={15} className="text-primary dark:text-[#d0bcff]" />
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border bg-muted/40">
+              <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                <Bot size={15} className="text-foreground" />
               </div>
-              <span className="font-bold text-sm text-text-primary dark:text-inverse-on-surface">Agent response</span>
-              <span className="ml-1 text-[10px] font-mono font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full bg-green-500/15 dark:bg-green-500/25 text-green-700 dark:text-green-300 border border-green-500/30 dark:border-green-500/40">
+              <span className="font-bold text-sm text-foreground">Agent response</span>
+              <span className="ml-1 text-[10px] font-mono font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
                 VERIFIED · {answer.citationCount} citation{answer.citationCount !== 1 ? 's' : ''}
               </span>
             </div>
 
             {/* Answer body */}
             <div className="p-6">
-              <h3 className="text-base font-bold text-text-primary dark:text-inverse-on-surface mb-2 mt-0">
+              <h3 className="text-base font-bold text-foreground mb-2 mt-0">
                 {answer.title}
               </h3>
-              <p className="text-sm text-text-secondary dark:text-[#cbc3d7] leading-relaxed mb-5">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                 {answer.intro}
               </p>
 
               <ol className="list-decimal pl-5 space-y-2 mb-6">
                 {answer.steps.map((step, i) => (
-                  <li key={i} className="text-sm font-medium text-text-primary dark:text-[#f0f1f2] leading-relaxed">
+                  <li key={i} className="text-sm font-medium text-foreground leading-relaxed">
                     {step}
                   </li>
                 ))}
               </ol>
 
               {/* Citation pills */}
-              <div className="flex gap-2.5 flex-wrap pt-2 border-t border-border-subtle dark:border-white/10">
+              <div className="flex gap-2.5 flex-wrap pt-2 border-t border-border">
                 {answer.citations.map((c) => (
                   <Link
                     key={c.testId}
                     href={c.href}
                     data-testid={c.testId}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 dark:bg-primary/20 text-primary dark:text-[#d0bcff] border border-primary/20 dark:border-primary/40 hover:bg-primary/20 dark:hover:bg-primary/30 no-underline transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted text-foreground border border-border hover:bg-muted/80 no-underline transition-all"
                   >
                     {c.icon}
                     {c.label}
