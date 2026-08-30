@@ -95,12 +95,12 @@ export default function DocsHomePage() {
               <Link
                 key={card.slug}
                 href={`/docs/${card.slug}`}
-                className="panel no-underline p-6 flex flex-col justify-between transition-all duration-200 hover:border-[#63f5ff]/40 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(99,245,255,0.12)]"
+                className="panel no-underline p-6 flex flex-col justify-between transition-all duration-200 hover:border-primary/40 dark:hover:border-[#63f5ff]/40 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(107,56,212,0.12)] dark:hover:shadow-[0_0_25px_rgba(99,245,255,0.12)]"
                 data-testid={`doc-card-${index}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-11 h-11 rounded-lg bg-[rgba(99,245,255,0.08)] border border-[rgba(99,245,255,0.2)] flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-lg bg-primary/10 dark:bg-[rgba(99,245,255,0.08)] border border-primary/20 dark:border-[rgba(99,245,255,0.2)] flex items-center justify-center">
                       {card.icon}
                     </div>
                     {card.badge && (
@@ -110,11 +110,11 @@ export default function DocsHomePage() {
                     )}
                   </div>
 
-                  <h3 className="font-bold text-lg text-[#eef6ff] mb-2">{card.title}</h3>
-                  <p className="text-xs text-[#8192ab] leading-relaxed mb-6">{card.desc}</p>
+                  <h3 className="font-bold text-lg text-text-primary dark:text-[#eef6ff] mb-2">{card.title}</h3>
+                  <p className="text-xs text-text-secondary dark:text-[#8192ab] leading-relaxed mb-6">{card.desc}</p>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-[#63f5ff] font-semibold mt-auto pt-3 border-t border-[rgba(143,185,220,0.1)]">
+                <div className="flex items-center gap-1.5 text-xs text-primary dark:text-[#63f5ff] font-semibold mt-auto pt-3 border-t border-border-subtle dark:border-[rgba(143,185,220,0.1)]">
                   <span>Read documentation</span>
                   <ArrowRight size={13} />
                 </div>
