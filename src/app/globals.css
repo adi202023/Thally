@@ -639,12 +639,49 @@ body {
   .page-header {
     padding: 20px 16px 16px;
     flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .page-header > div {
+    width: 100%;
+  }
+  .page-header .neon-button {
+    align-self: flex-start;
   }
   .page-content {
-    padding: 16px 16px 80px;
+    padding: 16px 16px 100px;
+    gap: 16px;
+  }
+  .feature-panel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 16px;
+  }
+  .feature-panel h2 {
+    font-size: 18px;
+  }
+  .pipeline {
+    padding: 16px 12px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pipeline-step {
+    min-width: 54px;
   }
   .workspace-row {
-    padding: 12px 16px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .workspace-row b {
+    font-size: 13px;
+  }
+  .workspace-row small {
+    font-size: 11px;
+  }
+  .row-state {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 }
 

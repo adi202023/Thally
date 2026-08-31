@@ -700,11 +700,11 @@ export default function ImpactDetailsPage() {
       </main>
 
       {/* Bottom Navigation (Floating Action Bar) */}
-      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-2 bg-card/95 dark:bg-[#111216]/95 backdrop-blur-xl border border-border shadow-2xl rounded-full w-fit mx-auto transition-all">
+      <nav className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-card/95 dark:bg-[#111216]/95 backdrop-blur-xl border border-border shadow-2xl rounded-full w-fit max-w-[calc(100vw-24px)] mx-auto transition-all">
         {/* Edit Button */}
         <button
           onClick={() => setEditModalOpen(true)}
-          className="text-foreground hover:bg-muted px-5 py-2.5 flex items-center gap-2 font-mono text-xs font-semibold rounded-full transition-all cursor-pointer border-none bg-transparent active:scale-95"
+          className="text-foreground hover:bg-muted px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 font-mono text-xs font-semibold rounded-full transition-all cursor-pointer border-none bg-transparent active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px]">edit</span>
           <span>Edit</span>

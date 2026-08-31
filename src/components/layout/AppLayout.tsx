@@ -57,7 +57,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { toasts, toast } = useToast();
 
-  // Dropdown state
+  // Mobile navigation drawer state
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Dropdown states
   const [notifOpen, setNotifOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -75,6 +78,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   useClickOutside(workspaceRef, () => setWorkspaceOpen(false));
   useClickOutside(profileRef, () => setProfileOpen(false));
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [pathname]);
+
+  // Prevent background scrolling when mobile drawer or command palette is open
+  useEffect(() => {
+    if (mobileDrawerOpen || cmdOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileDrawerOpen, cmdOpen]);
+
   // Theme init
   useEffect(() => {
     const dark =
@@ -86,7 +106,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('light', !dark);
   }, []);
 
-  // ⌘K shortcut
+  // ⌘K shortcut & ESC
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -95,7 +115,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         setCmdQuery('');
         setSelectedIndex(0);
       }
-      if (e.key === 'Escape') setCmdOpen(false);
+      if (e.key === 'Escape') {
+        setCmdOpen(false);
+        setMobileDrawerOpen(false);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -154,7 +177,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AnimatedBackground variant="dashboard" />
 
       {/* ── TOAST NOTIFICATIONS ─────────────────────────────────────── */}
-      <div className="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+      <div className="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-32px)]">
         {toasts.map((t) => (
           <div
             key={t.id}
@@ -174,17 +197,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* ── SEARCH RESOURCES / COMMAND PALETTE MODAL ─────────────────── */}
       {cmdOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-14 sm:pt-20 px-3 sm:px-4 bg-black/70 backdrop-blur-md"
           onClick={() => setCmdOpen(false)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search Input Bar */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-4 border-b border-border bg-muted/30 flex-shrink-0">
               <span
-                className="material-symbols-outlined text-muted-foreground text-[22px]"
+                className="material-symbols-outlined text-muted-foreground text-[20px] sm:text-[22px]"
                 style={{ fontVariationSettings: "'FILL' 0" }}
               >
                 search
@@ -192,7 +215,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <input
                 ref={searchInputRef}
                 autoFocus
-                className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground font-sans"
+                className="flex-1 bg-transparent outline-none text-sm sm:text-base text-foreground placeholder:text-muted-foreground font-sans min-w-0"
                 placeholder="Search resources, documents, actions..."
                 value={cmdQuery}
                 onChange={(e) => {
@@ -221,13 +244,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   Clear
                 </button>
               )}
-              <kbd className="font-mono text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded">
+              <kbd className="hidden sm:inline-block font-mono text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded">
                 ESC
               </kbd>
             </div>
 
             {/* Results List */}
-            <div className="max-h-96 overflow-y-auto p-2">
+            <div className="flex-1 overflow-y-auto p-2 overscroll-contain">
               {filteredResources.length === 0 ? (
                 <div className="px-6 py-12 text-center text-muted-foreground text-sm">
                   <p className="font-medium text-foreground">No resources found</p>
@@ -242,18 +265,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         key={item.href + item.label}
                         onClick={() => handleSelectResource(item.href)}
                         onMouseEnter={() => setSelectedIndex(idx)}
-                        className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${
+                        className={`flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-colors cursor-pointer ${
                           isSelected
                             ? 'bg-foreground/10 text-foreground'
                             : 'hover:bg-muted text-foreground'
                         }`}
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className={`grid size-9 place-items-center rounded-lg border border-border flex-shrink-0 ${
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`grid size-8 sm:size-9 place-items-center rounded-lg border border-border flex-shrink-0 ${
                             isSelected ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'
                           }`}>
                             <span
-                              className="material-symbols-outlined text-[20px]"
+                              className="material-symbols-outlined text-[18px] sm:text-[20px]"
                               style={{ fontVariationSettings: "'FILL' 0" }}
                             >
                               {item.icon}
@@ -265,7 +288,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </div>
                         </div>
 
-                        <span className="flex-shrink-0 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border border-border bg-muted/60 text-muted-foreground">
+                        <span className="flex-shrink-0 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border border-border bg-muted/60 text-muted-foreground hidden sm:inline-block">
                           {item.category}
                         </span>
                       </div>
@@ -276,10 +299,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-5 py-2.5 border-t border-border bg-muted/20 text-[11px] text-muted-foreground font-mono">
-              <span>{filteredResources.length} resources available</span>
-              <div className="flex items-center gap-3">
-                <span>↑↓ navigate</span>
+            <div className="flex items-center justify-between px-4 sm:px-5 py-2.5 border-t border-border bg-muted/20 text-[11px] text-muted-foreground font-mono flex-shrink-0">
+              <span>{filteredResources.length} resources</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="hidden sm:inline">↑↓ navigate</span>
                 <span>↵ select</span>
                 <span>esc close</span>
               </div>
@@ -288,22 +311,244 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* ── TOP NAV ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md transition-colors duration-300">
-        <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-          {/* Brand + tabs */}
-          <div className="flex items-center gap-6">
+      {/* ── MOBILE NAVIGATION DRAWER (Slide-out) ────────────────────────── */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-[100] md:hidden">
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+
+          {/* Drawer Sidebar Container */}
+          <div className="fixed top-0 bottom-0 left-0 w-[82vw] max-w-[320px] bg-card border-r border-border shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-300">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20 flex-shrink-0">
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileDrawerOpen(false)}
+                className="flex items-center gap-2.5 no-underline text-foreground"
+              >
+                <ThallyLogo size={28} />
+                <div>
+                  <span className="font-bold text-base tracking-tight block leading-none">Thally</span>
+                  <span className="text-[10px] font-mono text-muted-foreground">v2.4.0 · Control Plane</span>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => setMobileDrawerOpen(false)}
+                aria-label="Close navigation"
+                className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border cursor-pointer bg-transparent"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Drawer Search Trigger Bar */}
+            <div className="p-3 border-b border-border flex-shrink-0">
+              <button
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setCmdOpen(true);
+                  setCmdQuery('');
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-muted/60 border border-border text-muted-foreground text-xs hover:text-foreground cursor-pointer text-left"
+              >
+                <span className="material-symbols-outlined text-[18px]">search</span>
+                <span>Search pages & docs...</span>
+                <kbd className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded bg-background border border-border">⌘K</kbd>
+              </button>
+            </div>
+
+            {/* Drawer Scrollable Navigation Links */}
+            <div className="flex-1 overflow-y-auto overscroll-contain p-3 space-y-4">
+              {/* Category: Core Workflow */}
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                  Core Workflow
+                </p>
+                <div className="space-y-1">
+                  {[
+                    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', desc: 'Main control plane' },
+                    { label: 'Impact Radar', href: '/impact', icon: 'radar', desc: 'Dependency topology' },
+                    { label: 'Deployments', href: '/preview', icon: 'rocket_launch', desc: 'Staging & previews' },
+                    { label: 'Infrastructure', href: '/changes', icon: 'developer_board', desc: 'Cluster telemetry' },
+                    { label: 'Security & Verify', href: '/verification', icon: 'shield_with_heart', desc: 'Verification pipeline' },
+                  ].map((item) => {
+                    const isActive = item.href === '/dashboard' ? pathname.startsWith('/dashboard') : pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors no-underline ${
+                          isActive
+                            ? 'bg-foreground text-background font-bold shadow-sm'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[20px] flex-shrink-0"
+                          style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          {item.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="leading-tight truncate">{item.label}</div>
+                          <div className={`text-[10px] font-normal truncate ${isActive ? 'text-background/80' : 'text-muted-foreground'}`}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Category: Knowledge & AI */}
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                  Knowledge & Intelligence
+                </p>
+                <div className="space-y-1">
+                  {[
+                    { label: 'Documentation Portal', href: '/docs', icon: 'menu_book', desc: 'Guides & specs' },
+                    { label: 'Agent Knowledge', href: '/agent', icon: 'smart_toy', desc: 'Ask AI with provenance' },
+                  ].map((item) => {
+                    const isActive = pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors no-underline ${
+                          isActive
+                            ? 'bg-foreground text-background font-bold shadow-sm'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[20px] flex-shrink-0"
+                          style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          {item.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="leading-tight truncate">{item.label}</div>
+                          <div className={`text-[10px] font-normal truncate ${isActive ? 'text-background/80' : 'text-muted-foreground'}`}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Category: Governance & Tools */}
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                  Governance & Review
+                </p>
+                <div className="space-y-1">
+                  {[
+                    { label: 'Audit Trail', href: '/audit', icon: 'history', desc: 'Historical telemetry logs' },
+                    { label: 'Engineering Review', href: '/review', icon: 'rate_review', desc: 'Proposals approval' },
+                    { label: 'Evidence Sources', href: '/evidence', icon: 'search', desc: 'Diffs & PR anchors' },
+                    { label: 'Support & FAQs', href: '/support', icon: 'help', desc: 'Help & documentation' },
+                  ].map((item) => {
+                    const isActive = pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors no-underline ${
+                          isActive
+                            ? 'bg-foreground text-background font-bold shadow-sm'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[20px] flex-shrink-0"
+                          style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          {item.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="leading-tight truncate">{item.label}</div>
+                          <div className={`text-[10px] font-normal truncate ${isActive ? 'text-background/80' : 'text-muted-foreground'}`}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Footer: User Profile & Quick Actions */}
+            <div className="p-3 border-t border-border bg-muted/20 flex-shrink-0 space-y-2">
+              <div className="flex items-center justify-between p-2 rounded-xl bg-card border border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="grid size-8 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+                    N
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground m-0">Aditya Sheregar</p>
+                    <p className="text-[10px] font-mono text-muted-foreground m-0">aditya@thally.io</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                  className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border bg-background cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {isDark ? 'light_mode' : 'dark_mode'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TOP NAV HEADER (Responsive Mobile + Desktop) ─────────────── */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md transition-colors duration-300">
+        <div className="flex h-16 items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 max-w-full">
+          {/* Brand + Mobile Menu Hamburger + Desktop Tabs */}
+          <div className="flex items-center gap-2 sm:gap-6 min-w-0">
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setMobileDrawerOpen((v) => !v)}
+              aria-label="Open navigation menu"
+              className="md:hidden grid size-9 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer border border-border/60 bg-transparent flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[22px]">
+                {mobileDrawerOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+
+            {/* Brand Logo & Name */}
             <Link
               href="/dashboard"
-              className="text-xl font-bold tracking-tight text-foreground no-underline hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 text-lg sm:text-xl font-bold tracking-tight text-foreground no-underline hover:opacity-80 transition-opacity flex-shrink-0"
             >
-              Thally
+              <ThallyLogo size={26} className="sm:hidden" />
+              <span>Thally</span>
             </Link>
+
+            {/* Desktop Navigation Links */}
             <nav className="hidden items-center gap-1 md:flex">
               {[
                 { label: 'Workflow', href: '/dashboard' },
                 { label: 'Audit', href: '/audit' },
                 { label: 'Agents', href: '/agent' },
+                { label: 'Docs', href: '/docs' },
               ].map((item) => {
                 const isActive = item.href === '/dashboard' ? pathname.startsWith('/dashboard') : pathname.startsWith(item.href);
                 return (
@@ -312,7 +557,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors no-underline ${
                       isActive
-                        ? 'bg-foreground/10 text-foreground'
+                        ? 'bg-foreground/10 text-foreground font-bold'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -323,10 +568,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
 
-          {/* Search Bar (Click to search resources) */}
+          {/* Desktop Search Bar (Click to search resources) */}
           <div
             onClick={() => { setCmdOpen(true); setCmdQuery(''); setSelectedIndex(0); }}
-            className="mx-auto hidden w-full max-w-xl items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 sm:flex cursor-pointer hover:border-foreground/30 hover:bg-muted/70 transition-all select-none"
+            className="mx-auto hidden w-full max-w-lg items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-1.5 lg:flex cursor-pointer hover:border-foreground/30 hover:bg-muted/70 transition-all select-none"
           >
             <span
               className="material-symbols-outlined text-muted-foreground pointer-events-none text-[18px]"
@@ -334,22 +579,32 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             >
               search
             </span>
-            <span className="w-full text-sm text-muted-foreground">
-              Search resources...
+            <span className="w-full text-xs text-muted-foreground">
+              Search resources, documentation, tools...
             </span>
             <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors">
               ⌘K
             </kbd>
           </div>
 
-          {/* Right controls */}
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {/* Right Action Controls */}
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+            {/* Quick Search Button on Mobile */}
+            <button
+              onClick={() => { setCmdOpen(true); setCmdQuery(''); setSelectedIndex(0); }}
+              aria-label="Search resources"
+              className="lg:hidden grid size-8 sm:size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer bg-transparent border-none"
+            >
+              <span className="material-symbols-outlined text-[20px]">search</span>
+            </button>
+
+            {/* Dark / Light Mode Toggle */}
             <button
               onClick={toggleTheme}
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+              className="grid size-8 sm:size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer bg-transparent border-none"
             >
-              <span className="material-symbols-outlined text-[20px]">
+              <span className="material-symbols-outlined text-[19px] sm:text-[20px]">
                 {isDark ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
@@ -359,49 +614,51 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <button
                 onClick={() => { setNotifOpen((v) => !v); setSettingsOpen(false); setWorkspaceOpen(false); setProfileOpen(false); }}
                 aria-label="Notifications"
-                className="grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                className="grid size-8 sm:size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer bg-transparent border-none"
               >
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: notifRead ? "'FILL' 1" : "'FILL' 0" }}>
+                <span className="material-symbols-outlined text-[19px] sm:text-[20px]" style={{ fontVariationSettings: notifRead ? "'FILL' 1" : "'FILL' 0" }}>
                   {notifRead ? 'notifications' : 'notifications_unread'}
                 </span>
               </button>
               {notifOpen && (
-                <div className="absolute top-[calc(100%+10px)] right-0 w-80 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border bg-card">
-                  <div className="p-3.5 pb-2.5 border-b border-border flex items-center justify-between">
+                <div className="absolute top-[calc(100%+8px)] right-0 w-[calc(100vw-32px)] max-w-xs sm:w-80 rounded-2xl overflow-hidden z-[200] shadow-2xl border border-border bg-card animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3.5 pb-2.5 border-b border-border flex items-center justify-between bg-muted/20">
                     <span className="font-bold text-xs text-foreground">Notifications</span>
-                    <button onClick={() => setNotifRead(true)} className="text-xs text-muted-foreground hover:text-foreground bg-transparent border-none cursor-pointer font-semibold hover:underline">Mark all as read</button>
+                    <button onClick={() => setNotifRead(true)} className="text-xs text-muted-foreground hover:text-foreground bg-transparent border-none cursor-pointer font-semibold hover:underline">Mark all read</button>
                   </div>
-                  {[
-                    { dot: 'bg-emerald-500', title: 'Smart Sync completed', time: '10m ago' },
-                    { dot: 'bg-red-500', title: 'New conflict detected in Schema Definition', time: '1h ago' },
-                    { dot: 'bg-emerald-500', title: 'Deployment verified', time: '2h ago' },
-                  ].map((n) => (
-                    <div key={n.title} className="flex items-start gap-2.5 p-3.5 border-b border-border/50 hover:bg-muted/50 transition-colors">
-                      <div className={`${n.dot} ${notifRead ? 'opacity-30' : ''} w-2 h-2 rounded-full flex-shrink-0 mt-1`} />
-                      <div>
-                        <p className="text-xs font-semibold text-foreground m-0 leading-tight">{n.title}</p>
-                        <p className="text-[10px] font-mono text-muted-foreground mt-1">{n.time}</p>
+                  <div className="max-h-72 overflow-y-auto">
+                    {[
+                      { dot: 'bg-emerald-500', title: 'Smart Sync completed', time: '10m ago' },
+                      { dot: 'bg-red-500', title: 'New conflict detected in Schema Definition', time: '1h ago' },
+                      { dot: 'bg-emerald-500', title: 'Deployment verified', time: '2h ago' },
+                    ].map((n) => (
+                      <div key={n.title} className="flex items-start gap-2.5 p-3.5 border-b border-border/50 hover:bg-muted/50 transition-colors">
+                        <div className={`${n.dot} ${notifRead ? 'opacity-30' : ''} w-2 h-2 rounded-full flex-shrink-0 mt-1`} />
+                        <div>
+                          <p className="text-xs font-semibold text-foreground m-0 leading-tight">{n.title}</p>
+                          <p className="text-[10px] font-mono text-muted-foreground mt-1">{n.time}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Settings */}
-            <div ref={settingsRef} className="relative">
+            {/* Settings (Desktop + Tablet) */}
+            <div ref={settingsRef} className="relative hidden sm:block">
               <button
                 onClick={() => { setSettingsOpen((v) => !v); setNotifOpen(false); setWorkspaceOpen(false); setProfileOpen(false); }}
                 aria-label="Settings"
-                className="grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer bg-transparent border-none"
               >
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>
                   settings
                 </span>
               </button>
               {settingsOpen && (
-                <div className="absolute top-[calc(100%+10px)] right-0 w-80 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border bg-card">
-                  <div className="p-3.5 pb-2.5 border-b border-border">
+                <div className="absolute top-[calc(100%+8px)] right-0 w-80 rounded-2xl overflow-hidden z-[200] shadow-2xl border border-border bg-card animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3.5 pb-2.5 border-b border-border bg-muted/20">
                     <span className="font-bold text-xs text-foreground">Settings</span>
                   </div>
                   {/* Account */}
@@ -420,7 +677,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <div className="p-3.5 border-b border-border">
                     <p className="text-[10px] font-mono font-bold tracking-wider uppercase text-muted-foreground mb-2">Preferences</p>
                     <div className="flex flex-col gap-2">
-                      {[{ label: 'Dark Mode', active: isDark, toggle: toggleTheme }, { label: 'Email Notifications', active: true, toggle: () => {} }, { label: 'Sync Alerts', active: false, toggle: () => {} }].map((p) => (
+                      {[{ label: 'Dark Mode', active: isDark, toggle: toggleTheme }, { label: 'Email Alerts', active: true, toggle: () => {} }, { label: 'Sync Logs', active: true, toggle: () => {} }].map((p) => (
                         <div key={p.label} className="flex justify-between items-center text-xs">
                           <span className="text-muted-foreground">{p.label}</span>
                           <button onClick={p.toggle} className={`w-9 h-5 rounded-full border-none cursor-pointer transition-colors relative ${p.active ? 'bg-foreground' : 'bg-muted'}`}>
@@ -446,33 +703,33 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* Workspace switcher */}
-            <div ref={workspaceRef} className="relative">
+            {/* Workspace switcher (Desktop) */}
+            <div ref={workspaceRef} className="relative hidden sm:block">
               <button
                 onClick={() => { setWorkspaceOpen((v) => !v); setNotifOpen(false); setSettingsOpen(false); setProfileOpen(false); }}
                 aria-label="Switch workspace"
-                className="grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer bg-transparent border-none"
               >
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>
                   dns
                 </span>
               </button>
               {workspaceOpen && (
-                <div className="absolute top-[calc(100%+10px)] right-0 w-64 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border bg-card">
-                  <div className="p-3.5 pb-2.5 border-b border-border">
+                <div className="absolute top-[calc(100%+8px)] right-0 w-64 rounded-2xl overflow-hidden z-[200] shadow-2xl border border-border bg-card animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3.5 pb-2.5 border-b border-border bg-muted/20">
                     <span className="font-bold text-xs text-foreground">Workspaces</span>
                   </div>
                   <div className="p-2">
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted border border-border">
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted border border-border">
                       <span className="material-symbols-outlined text-foreground text-lg">check_circle</span>
                       <div>
                         <p className="text-xs font-semibold text-foreground m-0">Thally — Main Control</p>
-                        <p className="text-[10px] font-mono text-muted-foreground m-0">current</p>
+                        <p className="text-[10px] font-mono text-muted-foreground m-0">current workspace</p>
                       </div>
                     </div>
                     <button
-                      onClick={() => { setWorkspaceOpen(false); toast('New workspace coming soon', 'info'); }}
-                      className="flex items-center gap-2 w-full mt-1.5 p-2.5 rounded-lg border-none bg-transparent cursor-pointer text-xs text-foreground font-medium hover:bg-muted transition-colors"
+                      onClick={() => { setWorkspaceOpen(false); toast('New workspace creation ready in team edition', 'info'); }}
+                      className="flex items-center gap-2 w-full mt-1.5 p-2.5 rounded-xl border-none bg-transparent cursor-pointer text-xs text-foreground font-medium hover:bg-muted transition-colors"
                     >
                       <span className="material-symbols-outlined text-base">add</span>
                       + New workspace
@@ -482,38 +739,39 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* Profile avatar */}
+            {/* Profile Avatar Trigger */}
             <div ref={profileRef} className="relative">
               <button
                 onClick={() => { setProfileOpen((v) => !v); setNotifOpen(false); setSettingsOpen(false); setWorkspaceOpen(false); }}
-                className="ml-1 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
-                aria-label="Profile"
+                className="ml-0.5 cursor-pointer hover:opacity-80 active:scale-95 transition-all bg-transparent border-none p-0"
+                aria-label="Profile menu"
               >
-                <div className="grid size-9 place-items-center rounded-full bg-foreground text-xs font-semibold text-background border border-border">
+                <div className="grid size-8 sm:size-9 place-items-center rounded-full bg-foreground text-xs font-bold text-background border border-border shadow-sm">
                   N
                 </div>
               </button>
               {profileOpen && (
-                <div className="absolute top-[calc(100%+10px)] right-0 w-56 rounded-xl overflow-hidden z-[200] shadow-2xl border border-border bg-card">
-                  <div className="p-3.5 border-b border-border flex items-center gap-2.5">
-                    <div className="grid size-8 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+                <div className="absolute top-[calc(100%+8px)] right-0 w-[calc(100vw-32px)] max-w-[240px] rounded-2xl overflow-hidden z-[200] shadow-2xl border border-border bg-card animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3.5 border-b border-border flex items-center gap-2.5 bg-muted/20">
+                    <div className="grid size-8 place-items-center rounded-full bg-foreground text-xs font-bold text-background flex-shrink-0">
                       N
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-foreground m-0">Aditya Sheregar</p>
-                      <p className="text-[10px] font-mono text-muted-foreground m-0">aditya@thally.io</p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground m-0 truncate">Aditya Sheregar</p>
+                      <p className="text-[10px] font-mono text-muted-foreground m-0 truncate">aditya@thally.io</p>
                     </div>
                   </div>
                   <div className="p-1.5">
                     {[
+                      { label: 'Documentation', icon: 'menu_book', action: () => { setProfileOpen(false); router.push('/docs'); } },
+                      { label: 'Support & Help', icon: 'help', action: () => { setProfileOpen(false); router.push('/support'); } },
                       { label: 'Settings', icon: 'settings', action: () => { setProfileOpen(false); setSettingsOpen(true); } },
-                      { label: 'Support', icon: 'help', action: () => { setProfileOpen(false); router.push('/support'); } },
-                      { label: 'Log out', icon: 'logout', action: () => { setProfileOpen(false); toast('Logged out', 'info'); } },
+                      { label: 'Log out', icon: 'logout', action: () => { setProfileOpen(false); toast('Logged out successfully', 'info'); } },
                     ].map((item) => (
                       <button
                         key={item.label}
                         onClick={item.action}
-                        className={`flex items-center gap-2.5 w-full p-2 rounded-lg border-none bg-transparent cursor-pointer text-xs font-medium text-left text-foreground hover:bg-muted transition-colors ${item.label === 'Log out' ? 'text-red-500 dark:text-red-400' : ''}`}
+                        className={`flex items-center gap-2.5 w-full p-2.5 rounded-xl border-none bg-transparent cursor-pointer text-xs font-medium text-left text-foreground hover:bg-muted transition-colors ${item.label === 'Log out' ? 'text-red-500 dark:text-red-400' : ''}`}
                       >
                         <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
                         {item.label}
@@ -528,13 +786,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* ── APP BODY (Sidebar + Content) ────────────────────────────── */}
+      {/* ── APP BODY (Desktop Sidebar + Content) ───────────────────────── */}
       <div className="flex relative z-10">
 
-        {/* ── LEFT SIDEBAR (Expand on hover) ──────────────────────── */}
-        <aside className="hidden md:flex flex-col flex-shrink-0 w-20 hover:w-64 transition-all duration-300 border-r border-border bg-background/80 backdrop-blur-md group overflow-x-hidden overflow-y-hidden no-scrollbar sticky top-16 h-[calc(100vh-4rem)] z-40 select-none">
+        {/* ── DESKTOP LEFT SIDEBAR (Expand on hover & Smooth Scrollable) ── */}
+        <aside className="hidden md:flex flex-col flex-shrink-0 w-20 hover:w-64 transition-all duration-300 border-r border-border bg-background/85 backdrop-blur-md group overflow-x-hidden overflow-y-auto no-scrollbar sticky top-16 h-[calc(100vh-4rem)] z-40 select-none">
           {/* Brand header */}
-          <div className="px-5 py-5 flex items-center gap-3.5 whitespace-nowrap border-b border-border">
+          <div className="px-5 py-4 flex items-center gap-3.5 whitespace-nowrap border-b border-border flex-shrink-0">
             <ThallyLogo size={32} />
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="font-bold text-foreground text-sm leading-tight">
@@ -546,8 +804,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Main Nav */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden no-scrollbar">
+          {/* Main Nav Items */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain no-scrollbar">
             {navItems.map((item) => {
               const isActive =
                 item.href === '/dashboard'
@@ -558,7 +816,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   title={item.label}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 no-underline cursor-pointer ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 no-underline cursor-pointer ${
                     isActive
                       ? 'bg-foreground/10 text-foreground font-bold'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-0.5'
@@ -580,8 +838,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {/* Bottom Nav */}
-          <div className="px-3 py-4 border-t border-border space-y-1 overflow-hidden">
+          {/* Bottom Nav Items */}
+          <div className="px-3 py-4 border-t border-border space-y-1 overflow-hidden flex-shrink-0">
             {bottomNavItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
@@ -589,7 +847,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   title={item.label}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 no-underline cursor-pointer ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 no-underline cursor-pointer ${
                     isActive
                       ? 'bg-foreground/10 text-foreground font-bold'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-0.5'
@@ -621,11 +879,60 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        {/* ── MAIN CONTENT ──────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 overflow-x-hidden">
+        {/* ── MAIN CONTENT CONTAINER ─────────────────────────────────── */}
+        <div className="flex-1 min-w-0 overflow-x-hidden pb-20 md:pb-6">
           {children}
         </div>
       </div>
+
+      {/* ── MOBILE BOTTOM NAVIGATION BAR (Fixed Dock) ────────────────── */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border px-3 py-2 flex items-center justify-around pb-[max(0.6rem,env(safe-area-inset-bottom))]"
+      >
+        {[
+          { label: 'Workflow', href: '/dashboard', icon: 'dashboard' },
+          { label: 'Impact', href: '/impact', icon: 'radar' },
+          { label: 'Agent', href: '/agent', icon: 'smart_toy' },
+          { label: 'Docs', href: '/docs', icon: 'menu_book' },
+        ].map((tab) => {
+          const isActive = tab.href === '/dashboard' ? pathname.startsWith('/dashboard') : pathname.startsWith(tab.href);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline ${
+                isActive
+                  ? 'text-foreground font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <div className={`p-1 rounded-lg ${isActive ? 'bg-foreground/10' : ''}`}>
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  {tab.icon}
+                </span>
+              </div>
+              <span className="text-[10px] font-medium leading-none">{tab.label}</span>
+            </Link>
+          );
+        })}
+
+        {/* More / Menu Drawer Trigger */}
+        <button
+          onClick={() => setMobileDrawerOpen(true)}
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-muted-foreground hover:text-foreground transition-all border-none bg-transparent cursor-pointer"
+        >
+          <div className="p-1 rounded-lg">
+            <span className="material-symbols-outlined text-[20px]">
+              menu
+            </span>
+          </div>
+          <span className="text-[10px] font-medium leading-none">Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }
