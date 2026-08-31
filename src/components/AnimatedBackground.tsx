@@ -99,14 +99,14 @@ export function AnimatedBackground({
     const isDark = activeTheme === "dark"
     const isLanding = variant === "landing"
 
-    // Dashboard: exact original intensity. Landing: boosted vivid intensity.
+    // Dashboard: exact original intensity. Landing: refined, non-clingy subtle intensity.
     const baseRGB = isDark ? "255, 255, 255" : isLanding ? "30, 41, 59" : "40, 40, 45"
     const particleOpacity = isDark
-      ? (isLanding ? 0.35 : 0.16)
-      : (isLanding ? 0.40 : 0.12)
+      ? (isLanding ? 0.18 : 0.16)
+      : (isLanding ? 0.22 : 0.12)
     const lineOpacityMax = isDark
-      ? (isLanding ? 0.28 : 0.14)
-      : (isLanding ? 0.34 : 0.10)
+      ? (isLanding ? 0.15 : 0.14)
+      : (isLanding ? 0.18 : 0.10)
     const accent = isDark ? accentColor : "#D97706"
 
     let width = 0
@@ -122,19 +122,19 @@ export function AnimatedBackground({
     let mouseX = -9999
     let mouseY = -9999
 
-    const connectDistance = () => (isMobile ? (isLanding ? 90 : 0) : isLanding ? 155 : 130)
+    const connectDistance = () => (isMobile ? 0 : isLanding ? 135 : 130)
     // Non-clingy subtle cursor range on landing only
-    const mouseConnectDistance = isLanding ? 140 : 0
+    const mouseConnectDistance = isLanding ? 120 : 0
 
     function seedParticles() {
       isMobile = width < 768
       const area = width * height
-      let count = Math.round(area / (isLanding ? 9000 : 12000))
-      count = Math.max(isLanding ? 55 : 40, Math.min(isLanding ? 175 : 140, count))
-      if (isMobile) count = Math.round(count / (isLanding ? 1.5 : 2))
+      let count = Math.round(area / (isLanding ? 12000 : 12000))
+      count = Math.max(40, Math.min(140, count))
+      if (isMobile) count = Math.round(count / 2)
 
       particles = Array.from({ length: count }, () => {
-        const r = Math.random() * 1.5 + (isLanding ? 1.2 : 0.9)
+        const r = Math.random() * 1.3 + 0.9
         return {
           x: Math.random() * width,
           y: Math.random() * height,
@@ -180,7 +180,7 @@ export function AnimatedBackground({
           if (distSq < maxSq) {
             const alpha = (1 - distSq / maxSq) * lineOpacityMax
             currentCtx.strokeStyle = `rgba(${baseRGB}, ${alpha})`
-            currentCtx.lineWidth = isDark ? (isLanding ? 0.85 : 0.6) : (isLanding ? 0.95 : 0.7)
+            currentCtx.lineWidth = isDark ? 0.6 : 0.7
             currentCtx.beginPath()
             currentCtx.moveTo(a.x, a.y)
             currentCtx.lineTo(b.x, b.y)
@@ -189,7 +189,7 @@ export function AnimatedBackground({
         }
       }
 
-      // Subtle cursor connection on landing only
+      // Subtle, non-clingy cursor connection on landing only
       if (mouseConnectDistance > 0 && mouseX > 0 && mouseY > 0 && !isMobile) {
         const mouseSq = mouseConnectDistance * mouseConnectDistance
         for (let i = 0; i < particles.length; i++) {
@@ -199,9 +199,9 @@ export function AnimatedBackground({
           const distSq = dx * dx + dy * dy
           if (distSq < mouseSq) {
             const ratio = 1 - distSq / mouseSq
-            const alpha = ratio * (isDark ? 0.45 : 0.48)
+            const alpha = ratio * (isDark ? 0.28 : 0.32)
             currentCtx.strokeStyle = `rgba(${baseRGB}, ${alpha})`
-            currentCtx.lineWidth = 0.9
+            currentCtx.lineWidth = 0.75
             currentCtx.beginPath()
             currentCtx.moveTo(p.x, p.y)
             currentCtx.lineTo(mouseX, mouseY)
@@ -213,7 +213,7 @@ export function AnimatedBackground({
 
     function maybeSpawnPulse(now: number) {
       if (isMobile) return
-      if (now - lastPulseAt < (isLanding ? 1700 : 2400)) return
+      if (now - lastPulseAt < 2400) return
       if (Math.random() > 0.45) return
       const max = connectDistance()
       const maxSq = max * max
@@ -257,19 +257,18 @@ export function AnimatedBackground({
         const y = a.y + (b.y - a.y) * pulse.t
 
         // Glow
-        const glowRadius = isLanding ? 8 : 6
-        const grad = currentCtx.createRadialGradient(x, y, 0, x, y, glowRadius)
-        grad.addColorStop(0, hexToRgba(accent, (isLanding ? 1.0 : 0.9) * fade))
+        const grad = currentCtx.createRadialGradient(x, y, 0, x, y, 6)
+        grad.addColorStop(0, hexToRgba(accent, 0.9 * fade))
         grad.addColorStop(1, hexToRgba(accent, 0))
         currentCtx.fillStyle = grad
         currentCtx.beginPath()
-        currentCtx.arc(x, y, glowRadius, 0, Math.PI * 2)
+        currentCtx.arc(x, y, 6, 0, Math.PI * 2)
         currentCtx.fill()
 
         // Core dot
         currentCtx.fillStyle = hexToRgba(accent, fade)
         currentCtx.beginPath()
-        currentCtx.arc(x, y, isLanding ? 2.0 : 1.6, 0, Math.PI * 2)
+        currentCtx.arc(x, y, 1.6, 0, Math.PI * 2)
         currentCtx.fill()
       }
     }
